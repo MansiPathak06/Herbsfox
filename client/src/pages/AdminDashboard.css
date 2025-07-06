@@ -1,0 +1,188 @@
+.admin-dashboard {
+  padding: 20px;
+  max-width: 1200px;
+  margin: auto;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.admin-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.admin-nav button {
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.admin-nav button:hover {
+  background-color: #125ea6;
+}
+
+.admin-logout-button {
+  background-color: #e53935;
+}
+
+.admin-section {
+  margin-top: 30px;
+}
+
+.admin-search {
+  padding: 10px;
+  width: 100%;
+  max-width: 400px;
+  font-size: 16px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.admin-user-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-user-list li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  padding: 14px 20px;
+  margin-bottom: 12px;
+}
+
+.admin-user-list li div:first-child {
+  flex: 1 1 60%;
+  min-width: 200px;
+  font-weight: 500;
+  color: #333;
+}
+
+.admin-user-list li div:last-child {
+  flex: 1 1 40%;
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.admin-btn {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.admin-btn:hover {
+  transform: scale(1.05);
+}
+
+.admin-btn-promote {
+  background-color: #4caf50;
+  color: white;
+}
+
+.admin-btn-demote {
+  background-color: #ff9800;
+  color: white;
+}
+
+.admin-btn-delete {
+  background-color: #f44336;
+  color: white;
+}
+
+/* ✅ Responsive styles */
+@media (max-width: 768px) {
+  .admin-user-list li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-user-list li div:last-child {
+    justify-content: flex-start;
+    margin-top: 10px;
+  }
+
+  .admin-nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-nav button {
+    width: 100%;
+  }
+
+  .admin-search {
+    width: 100%;
+  }
+}
+
+
+.admin-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px;
+}
+
+.admin-order-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.admin-order-card h4 {
+  margin-bottom: 10px;
+  color: #2c3e50;
+}
+
+.admin-order-card p {
+  margin: 5px 0;
+}
+
+.order-items ul {
+  margin-left: 20px;
+  padding-left: 0;
+}
+
+.order-status-control {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+select {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+@media (max-width: 768px) {
+  .admin-order-card {
+    padding: 15px;
+    font-size: 14px;
+  }
+  .admin-orders-list {
+    gap: 15px;
+  }
+}

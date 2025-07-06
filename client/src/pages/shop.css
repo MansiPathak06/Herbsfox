@@ -1,0 +1,181 @@
+*{
+font-family:  'Open Sans', sans-serif;
+}
+
+.gallery {
+  padding: 2rem;
+  text-align: center;
+  font-family: sans-serif;
+  box-sizing: border-box;
+}
+
+.image-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 columns */
+  gap: 24px;
+  padding: 10px;
+  width: 100%;
+}
+
+.image-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-right: 50px;
+  background-color: white;
+}
+
+.image-container img {
+  width: 100%;
+  height: 350px; /* Fixed height for uniformity */
+  /* Crop nicely */
+}
+
+.caption {
+  margin-top: 10px;
+  font-size: 16px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #555;
+  text-align: center;
+}
+
+.caption2 {
+  margin-top: 10px;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: #555;
+  text-align: center;
+}
+
+/* Tablet: 2 images per row */
+@media (max-width: 900px) {
+  .image-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile: 1 image per row */
+@media (max-width: 600px) {
+  .image-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Pagination styles */
+.pagination {
+  margin-top: 1.5rem;
+}
+
+.pagination button {
+  margin: 0 5px;
+  padding: 8px 12px;
+  background-color: transparent;
+  border: 1px solid rgb(198, 197, 197);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.pagination .active {
+  background-color: #a8a9aa;
+  color: rgb(5, 0, 0);
+}
+.image-container {
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.pooja,
+.spices,
+.herbs,
+.seeds {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.image-container:hover .pooja {
+  transform: scale(1.03);
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(1px); /* blur effect */
+  background-color: rgba(255, 255, 255, 0.653); /* white tint */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.image-container:hover .overlay {
+  opacity: 1;
+}
+
+.select-button {
+  color: #ffffff;
+  font-size: 13px;
+  line-height: 56px;
+  height: 56px;
+  text-transform: uppercase;
+  font-family: Open Sans;
+  font-weight: 400;
+  letter-spacing: 2px;
+  background-color: #799e8b;
+
+  border-width: 1px;
+}
+.shop-heading {
+  background: url("heading-bg.jpg");
+  color: white;
+  margin-top: 35px;
+  text-align: center;
+  width: 100%;
+  font-size: 28px;
+  height: auto;
+  padding: 30px 0;
+  font-weight: 300;
+  padding-top: 50px;
+  text-decoration: none;
+  height: 160px;
+  width: 100%;
+  font-weight: 300;
+  font-size: 65px;
+}
+@media (max-width: 768px) {
+    .image-container {
+      width: 88%;
+      grid-template-columns: 1fr;
+      padding: 20px;
+    }
+  
+    .contact-container {
+      margin-left: auto;
+      margin-right: auto;
+      padding: 10px;
+    }
+}  
+
+.sort-wrapper {
+  display: flex;
+  justify-content: flex-start;   /* left aligned, जैसा WooCommerce में होता है */
+  margin: 0 0 20px 0;
+}
+
+.sort-wrapper select {
+  background: transparent;
+  padding: 12px 15px;
+  font-size: 15px;
+  margin-left: 10px;
+  border: 1px solid #ccc;
+  color: #555;
+  border-radius: 4px;
+}

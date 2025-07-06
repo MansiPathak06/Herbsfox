@@ -1,0 +1,87 @@
+.about-heading {
+  background: url("Aboutbg.jpg")
+    no-repeat center center;
+  background-size: cover;
+  display: flex;
+  align-items: flex-end; /* Align content to the bottom */
+  justify-content: center; /* Center horizontally */
+  height: 200px;
+  width: 100%;
+  color: white;
+  font-size: 65px;
+  font-weight: 300;
+  padding-bottom: 20px; /* Space from the bottom */
+  margin-top: 40px;
+  text-decoration: none;
+  text-align: center;
+}
+
+.strong-text {
+  font-size: 2vw; /* Adjusts with screen width */
+  color: black;
+}
+
+.about-section {
+  margin-top: -100px;
+  padding: 10vw; /* Adjusts based on screen width */
+  font-size: 1.2rem;
+  color: rgb(87, 86, 86);
+}
+
+.our-story,
+.what-we-do,
+.our-values,
+.founders-vision {
+  color: #4ea753;
+  font-size: 3vw; /* Responsive font size */
+  font-weight: 300;
+  font-family: Georgia, "Times New Roman", Times, serif;
+}
+
+/* Responsive Design of about section*/
+@media (max-width: 1024px) {
+  /* Tablets */
+  .about-section {
+    padding: 80px;
+    font-size: 1rem;
+  }
+
+  .our-story,
+  .what-we-do,
+  .our-values,
+  .founders-vision {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Mobile devices */
+  .about-section {
+    margin-top: -50px;
+    padding: 50px;
+    font-size: 0.9rem;
+  }
+
+  .our-story,
+  .what-we-do,
+  .our-values,
+  .founders-vision {
+    font-size: 24px;
+    text-align: center; /* Center align text for better mobile view */
+  }
+}
+
+@media (max-width: 480px) {
+  /* Small mobile screens */
+  .about-section {
+    padding: 30px;
+    font-size: 0.8rem;
+  }
+
+  .our-story,
+  .what-we-do,
+  .our-values,
+  .founders-vision {
+    font-size: 20px;
+  }
+}

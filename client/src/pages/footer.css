@@ -1,0 +1,198 @@
+footer h2 {
+  text-align: center;
+  color: rgb(69, 127, 69);
+  font-size: 2.5rem;
+}
+
+.footer {
+  font-size: 1rem;
+  text-align: center;
+  color: #333;
+  padding: 40px 20px;
+  font-family: var(--e-global-typography-text-font-family), Sans-serif;
+  width: 100%;
+  cursor: pointer;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.footer-container {
+  margin-top: 70px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 8px;
+  margin-bottom: 40px;
+}
+
+.footer-links a {
+  color: #737475;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: #2c6337;
+}
+
+.footer-links span {
+  color: #bbb;
+  user-select: none;
+}
+
+/* Social Icons */
+.social-icons {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 1rem;
+  flex-wrap: wrap;
+  position: relative;
+  bottom: auto;
+  left: auto;
+  transform: none;
+}
+
+.social-icons div {
+  padding: 6px;
+  background-color: white;
+  border: none;
+  border-radius: 50%;
+}
+
+.social-icons div:hover,
+.social-icons a:hover {
+  color: #6ec1e4;
+}
+
+.social-icons a {
+  color: inherit;
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* Policy Styles */
+.policyheading {
+  text-align: center;
+  color: #333333;
+  font-size: 2rem;
+  line-height: 1.4;
+  font-weight: 600;
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+}
+
+.subheading {
+  color: #141313;
+  font-size: 1.2rem;
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: 1px;
+  margin-top: 1.5rem;
+  text-transform: uppercase;
+}
+
+.policy-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #3b3636;
+}
+
+/* Certificates */
+.footer-certificates {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 35px 20px;
+  margin: 0 auto;
+  max-width: 1000px;
+}
+
+/* Make all certificates equal size */
+.footer-certificates img {
+  width: 180px;         /* Equal fixed width */
+  height: 120px;        /* Equal fixed height */
+  object-fit: contain;  /* Maintain image aspect without distortion */
+  
+  padding: 8px;
+  background: transparent;
+  border-radius: 8px;
+}
+
+
+/* Responsive - Tablets */
+@media (max-width: 768px) {
+  .policy-container {
+    padding: 1.25rem;
+    margin: 1rem;
+  }
+
+  .policyheading {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+  }
+
+  .subheading {
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+  }
+
+  .footer-certificates {
+    gap: 15px;
+  }
+
+  .footer-certificates img {
+    max-width: 160px;
+  }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 480px) {
+  .policy-container {
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+
+  .policyheading {
+    font-size: 1.25rem;
+  }
+
+  .subheading {
+    font-size: 1rem;
+  }
+
+  .footer-certificates {
+    gap: 10px;
+  }
+
+  .footer-certificates img {
+    max-width: 120px;
+  }
+
+  .footer {
+    font-size: 0.95rem;
+  }
+}
+@media (max-width: 600px) {
+  .footer-certificates {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer-certificates img {
+    width: 80%;
+    height: auto;
+  }
+}
+

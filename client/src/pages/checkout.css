@@ -1,0 +1,135 @@
+.checkout-heading {
+  background: url("heading-bg.jpg");
+  color: white;
+  margin-top: 35px;
+  text-align: center;
+  width: 100%;
+  font-size: 28px;
+  height: auto;
+  padding: 30px 0;
+  font-weight: 300;
+  padding-top: 50px;
+  text-decoration: none;
+  height: 120px;
+  width: 100%;
+  font-weight: 300;
+  font-size: 65px;
+}
+.checkout-container {
+  display: flex;
+  padding: 20px;
+  gap: 30px;
+  justify-content: space-between;
+}
+
+.checkout-left{
+  flex: 1;
+  padding: 20px;
+  border-radius: 8px;
+}
+.checkout-right {
+  margin-top: 50px;
+  border: 1px solid rgb(169, 166, 166);
+  height: fit-content;
+  border-radius: 0px;
+  padding: 20px;
+  flex: 0.6;
+}
+.checkout-content {
+  font-size: 12px;
+  color: gray;
+}
+
+.checkout-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.empty-checkout {
+  text-align: center;
+  margin: 40px 0;
+  font-size: 18px;
+  color: #777;
+}
+.order-summary-lines {
+  background: gray;
+  
+}
+.shipping-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.shipping-form input,
+.shipping-form select {
+  padding: 12px;
+  border: 1px solid #000;
+  border-radius: 3px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-row input {
+  flex: 0.5;
+}
+.shipping-address{
+  color: #639203;
+  font-weight: 400;
+}
+.order-summary{
+  color: #639203;
+  font-weight: 100;
+}
+
+
+.place-order-btn {
+  padding: 15px;
+  margin-top: 35px;
+  font-size: 16px;
+  background-color:#799e8b;
+  color: white;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  margin-left: -30px;
+}
+.place-order-btn:hover{
+  background-color: aliceblue;
+  color: #000;
+}
+.payments-form{
+  padding: 30px;
+}
+.cash-on-delivery,.online-payment{
+  color: #000;
+}
+.payment-options {
+  margin-left: -30px;
+  color: #639203;
+  font-weight: 400;
+
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  gap: 10px;
+  cursor: pointer;
+}
+.radio-label input[type="radio"] {
+  accent-color: #639203; /* Optional */
+  margin: 0;
+}
