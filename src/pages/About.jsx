@@ -21,7 +21,7 @@ const About = () => {
         </p>
 
         <article>
-          <h2 className="Our-story">Our Story:</h2>
+          <h2 className="Our-story">Our Story :</h2>
           <p>
             It all began with a simple belief: that nature holds the key to a
             healthier, happier life. We started small, tending to our own herb
