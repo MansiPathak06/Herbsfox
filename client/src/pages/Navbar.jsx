@@ -8,7 +8,7 @@ import {
 import { useCart } from "../context/CartContext";
 import { useProductContext } from "../context/ProductContext";
 
-import "./navbar.css";
+import "./Navbar.css";
 
 const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -43,16 +43,13 @@ const Navbar = () => {
   // Close search bar if clicked outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        searchContainerRef.current &&
-        !searchContainerRef.current.contains(event.target)
-      ) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
         setSearchActive(false); // Close search bar when clicked outside
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-
+    
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -72,14 +69,10 @@ const Navbar = () => {
 
       <ul className={`nav-links ${menuOpen ? "open" : ""}`}>
         <li>
-          <Link to="/" onClick={() => setMenuOpen(false)}>
-            HOME
-          </Link>
+          <Link to="/" onClick={() => setMenuOpen(false)}>HOME</Link>
         </li>
         <li>
-          <Link to="/about" onClick={() => setMenuOpen(false)}>
-            ABOUT
-          </Link>
+          <Link to="/about" onClick={() => setMenuOpen(false)}>ABOUT</Link>
         </li>
         <li
           className="dropdown"
@@ -98,33 +91,15 @@ const Navbar = () => {
           </Link>
           {(shopDropdownOpen || menuOpen) && (
             <ul className="dropdown-menu">
-              <li>
-                <Link to="/herbs" onClick={() => setMenuOpen(false)}>
-                  HERBS
-                </Link>
-              </li>
-              <li>
-                <Link to="/spices" onClick={() => setMenuOpen(false)}>
-                  SPICES
-                </Link>
-              </li>
-              <li>
-                <Link to="/poojaitems" onClick={() => setMenuOpen(false)}>
-                  POOJA ITEMS
-                </Link>
-              </li>
-              <li>
-                <Link to="/seeds" onClick={() => setMenuOpen(false)}>
-                  SEEDS
-                </Link>
-              </li>
+              <li><Link to="/herbs" onClick={() => setMenuOpen(false)}>HERBS</Link></li>
+              <li><Link to="/spices" onClick={() => setMenuOpen(false)}>SPICES</Link></li>
+              <li><Link to="/poojaitems" onClick={() => setMenuOpen(false)}>POOJA ITEMS</Link></li>
+              <li><Link to="/seeds" onClick={() => setMenuOpen(false)}>SEEDS</Link></li>
             </ul>
           )}
         </li>
         <li>
-          <Link to="/contact" onClick={() => setMenuOpen(false)}>
-            CONTACT US
-          </Link>
+          <Link to="/contact" onClick={() => setMenuOpen(false)}>CONTACT US</Link>
         </li>
         <li
           className="dropdown"
@@ -144,28 +119,14 @@ const Navbar = () => {
           </Link>
           {(accountDropdownOpen || menuOpen) && (
             <ul className="dropdown-menu">
-              <li>
-                <Link to="/my-account" onClick={() => setMenuOpen(false)}>
-                  MY ACCOUNT
-                </Link>
-              </li>
-              <li>
-                <Link to="/cart" onClick={() => setMenuOpen(false)}>
-                  CART
-                </Link>
-              </li>
-              <li>
-                <Link to="/checkout" onClick={() => setMenuOpen(false)}>
-                  CHECKOUT
-                </Link>
-              </li>
+              <li><Link to="/my-account" onClick={() => setMenuOpen(false)}>MY ACCOUNT</Link></li>
+              <li><Link to="/cart" onClick={() => setMenuOpen(false)}>CART</Link></li>
+              <li><Link to="/checkout" onClick={() => setMenuOpen(false)}>CHECKOUT</Link></li>
             </ul>
           )}
         </li>
         <li>
-          <Link to="/blogs" onClick={() => setMenuOpen(false)}>
-            BLOGS
-          </Link>
+          <Link to="/blogs" onClick={() => setMenuOpen(false)}>BLOGS</Link>
         </li>
       </ul>
 
@@ -192,6 +153,7 @@ const Navbar = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
+            
           </form>
         </div>
       )}
