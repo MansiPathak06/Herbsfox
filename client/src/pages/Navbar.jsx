@@ -8,7 +8,7 @@ import {
 import { useCart } from "../context/CartContext";
 import { useProductContext } from "../context/ProductContext";
 
-import "./Navbar.css";
+import "./navbar.css";
 
 const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
