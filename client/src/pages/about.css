@@ -1,5 +1,5 @@
 .about-heading {
-  background: url("Aboutbg.jpg")
+  background: url("/images/Aboutbg.jpg")
     no-repeat center center;
   background-size: cover;
   display: flex;
