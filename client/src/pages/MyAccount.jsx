@@ -41,7 +41,7 @@ const MyAccount = () => {
 
       try {
         const response = await axios.get(
-          `http://localhost:5000/address/${userId}`,
+          `https://herbsfox-1.onrender.com/address/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -68,7 +68,7 @@ const MyAccount = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:5000/address/billing",
+        "https://herbsfox-1.onrender.com/address/billing",
         {
           full_name: addressObj.name,
           phone: addressObj.phone || "0000000000",
@@ -112,7 +112,7 @@ const MyAccount = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:5000/address/shipping",
+        "https://herbsfox-1.onrender.com/address/shipping",
         {
           full_name: addressObj.name,
           phone: addressObj.phone || "0000000000",
@@ -222,7 +222,7 @@ const fetchUserOrders = async () => {
 
   setLoadingOrders(true);
   try {
-    const response = await axios.get("http://localhost:5000/orders", {
+    const response = await axios.get("https://herbsfox-1.onrender.com/orders", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -285,7 +285,7 @@ const fetchUserOrders = async () => {
   }
 
     try {
-      const response = await axios.post("http://localhost:5000/login", {
+      const response = await axios.post("https://herbsfox-1.onrender.com/login", {
         nameOrEmail: loginData.nameOrEmail.trim(),
         password: loginData.password,
       });
@@ -342,7 +342,7 @@ const fetchUserOrders = async () => {
   }
   
     try {
-      const response = await axios.post("http://localhost:5000/register", {
+      const response = await axios.post("https://herbsfox-1.onrender.com/register", {
         name: registerData.name,
         phone: registerData.phone,
         email: registerData.email,
@@ -521,7 +521,7 @@ const fetchUserOrders = async () => {
                 try {
                   const token = localStorage.getItem("token");
                   const res = await axios.put(
-                    "http://localhost:5000/account/update",
+                    "https://herbsfox-1.onrender.com/account/update",
                     {
                       firstName,
                       lastName,

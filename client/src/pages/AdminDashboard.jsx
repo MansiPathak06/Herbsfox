@@ -50,7 +50,7 @@ const AdminDashboard = ({
   const fetchAdminProducts = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/admin/products", {
+      const res = await axios.get("https://herbsfox-1.onrender.com/admin/products", {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
       });
@@ -69,7 +69,7 @@ const AdminDashboard = ({
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
-      await axios.post("http://localhost:5000/admin/products", newProduct, {
+      await axios.post("https://herbsfox-1.onrender.com/admin/products", newProduct, {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
       });
@@ -97,7 +97,7 @@ const AdminDashboard = ({
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/admin/orders", {
+      const res = await axios.get("https://herbsfox-1.onrender.com/admin/orders", {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
       });
@@ -111,7 +111,7 @@ const AdminDashboard = ({
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:5000/admin/orders/${orderId}/status`,
+        `https://herbsfox-1.onrender.com/admin/orders/${orderId}/status`,
         { status: newStatus.toLowerCase() },
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
@@ -125,7 +125,7 @@ const AdminDashboard = ({
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/admin/users", {
+      const res = await axios.get("https://herbsfox-1.onrender.com/admin/users", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -141,7 +141,7 @@ const AdminDashboard = ({
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5000/admin/users/${id}`, {
+      await axios.delete(`https://herbsfox-1.onrender.com/admin/users/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -157,7 +157,7 @@ const AdminDashboard = ({
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:5000/admin/users/${id}/make-admin`,
+        `https://herbsfox-1.onrender.com/admin/users/${id}/make-admin`,
         {},
         {
           headers: {
@@ -176,7 +176,7 @@ const AdminDashboard = ({
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:5000/admin/users/${id}/revoke-admin`,
+        `https://herbsfox-1.onrender.com/admin/users/${id}/revoke-admin`,
         {},
         {
           headers: {
@@ -403,7 +403,7 @@ export default AdminDashboard;
 // const fetchAdminProducts = async () => {
 //   try {
 //     const token = localStorage.getItem("token");
-//     const res = await axios.get("http://localhost:5000/admin/products", {
+//     const res = await axios.get("https://herbsfox-1.onrender.com/admin/products", {
 //       headers: { Authorization: `Bearer ${token}` },
 //       withCredentials: true,
 //     });
@@ -416,7 +416,7 @@ export default AdminDashboard;
 //   const fetchOrders = async () => {
 //     try {
 //       const token = localStorage.getItem("token");
-//       const res = await axios.get("http://localhost:5000/admin/orders", {
+//       const res = await axios.get("https://herbsfox-1.onrender.com/admin/orders", {
 //         headers: { Authorization: `Bearer ${token}` },
 //         withCredentials: true,
 //       });
@@ -430,7 +430,7 @@ export default AdminDashboard;
 //     try {
 //       const token = localStorage.getItem("token");
 //       await axios.put(
-//         `http://localhost:5000/admin/orders/${orderId}/status`, // ← fixed
+//         `https://herbsfox-1.onrender.com/admin/orders/${orderId}/status`, // ← fixed
 //         { status: newStatus.toLowerCase() },
 //         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
 //       );
@@ -446,7 +446,7 @@ export default AdminDashboard;
 //   const fetchUsers = async () => {
 //     try {
 //       const token = localStorage.getItem("token");
-//       const res = await axios.get("http://localhost:5000/admin/users", {
+//       const res = await axios.get("https://herbsfox-1.onrender.com/admin/users", {
 //         headers: {
 //           Authorization: `Bearer ${token}`, // ✅ attach the token!
 //         },
@@ -466,7 +466,7 @@ export default AdminDashboard;
 //     if (!window.confirm("Are you sure you want to delete this user?")) return;
 //     try {
 //       const token = localStorage.getItem("token");
-//       await axios.delete(`http://localhost:5000/admin/users/${id}`, {
+//       await axios.delete(`https://herbsfox-1.onrender.com/admin/users/${id}`, {
 //         headers: {
 //           Authorization: `Bearer ${token}`,
 //         },
@@ -482,7 +482,7 @@ export default AdminDashboard;
 //     try {
 //       const token = localStorage.getItem("token");
 //       await axios.put(
-//         `http://localhost:5000/admin/users/${id}/make-admin`,
+//         `https://herbsfox-1.onrender.com/admin/users/${id}/make-admin`,
 //         {},
 //         {
 //           headers: {
@@ -501,7 +501,7 @@ export default AdminDashboard;
 //     try {
 //       const token = localStorage.getItem("token");
 //       await axios.put(
-//         `http://localhost:5000/admin/users/${id}/revoke-admin`,
+//         `https://herbsfox-1.onrender.com/admin/users/${id}/revoke-admin`,
 //         {},
 //         {
 //           headers: {
