@@ -28,7 +28,7 @@
 .contact-heading {
   margin-top: 35px;
   text-align: center;
-  background: url("heading-bg.jpg") center/cover no-repeat;
+  background: url("/images/heading-bg.jpg") center/cover no-repeat;
   color: white;
   text-decoration: none;
   padding-top: 50px;

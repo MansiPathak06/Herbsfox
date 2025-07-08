@@ -134,7 +134,7 @@ font-family:  'Open Sans', sans-serif;
   border-width: 1px;
 }
 .shop-heading {
-  background: url("heading-bg.jpg");
+  background: url("/images/heading-bg.jpg");
   color: white;
   margin-top: 35px;
   text-align: center;

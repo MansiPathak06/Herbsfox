@@ -75,7 +75,7 @@
 .page-heading {
     margin-top: 35px;
     text-align: center;
-    background: url("heading-bg.jpg") no-repeat center bottom; /* Align background to bottom center */
+    background: url("/images/heading-bg.jpg") no-repeat center bottom; /* Align background to bottom center */
     color: white;
     height: 180px;
     width: 100%;
@@ -88,7 +88,7 @@
     text-decoration: none;
   }
 .blogs-heading{
-    background: url("heading-bg.jpg");
+    background: url("/images/heading-bg.jpg");
     color: white;
     margin-top: 35px;
     text-align: center;
