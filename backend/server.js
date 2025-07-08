@@ -975,5 +975,5 @@ app.put("/admin/orders/:orderId/update-status", authenticateJWT, async (req, res
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
+   console.log(`Server running on port ${PORT}`);
 });

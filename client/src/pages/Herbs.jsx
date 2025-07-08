@@ -10,7 +10,7 @@ const Herbs = () => {
   useEffect(() => {
   const fetchHerbs = async () => {
     try {
-      const res = await fetch("http://localhost:5000/products?category=herbs");
+      const res = await fetch("https://herbsfox-1.onrender.com/products?category=herbs");
       const data = await res.json();
 
       const transformed = data.products.map((p) => {
