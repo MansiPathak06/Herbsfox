@@ -40,7 +40,7 @@ app.use(express.json());
 })();
 
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || "*",
+  origin: process.env.CORS_ORIGIN ,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
@@ -866,7 +866,7 @@ app.get("/admin/users", authenticateJWT, async (req, res) => {
 
 // Get all orders
 // ✅ Route for regular logged-in users to fetch *their own* orders
-app.get("/orders", authenticateJWT, async (req, res) => {
+app.get("/orders",  async (req, res) => {
   try {
     const userId = req.user.id;
 
