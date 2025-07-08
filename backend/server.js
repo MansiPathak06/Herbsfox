@@ -866,7 +866,7 @@ app.get("/admin/users", authenticateJWT, async (req, res) => {
 
 // Get all orders
 // ✅ Route for regular logged-in users to fetch *their own* orders
-app.get("/orders",  async (req, res) => {
+app.get("/orders", authenticateJWT, async (req, res) => {
   try {
     const userId = req.user.id;
 
