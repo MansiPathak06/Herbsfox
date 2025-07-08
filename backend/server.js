@@ -40,7 +40,7 @@ app.use(express.json());
 })();
 
 const corsOptions = {
-  origin: "https://herbsfox.netlify.app",
+  origin: process.env.CORS_ORIGIN,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
