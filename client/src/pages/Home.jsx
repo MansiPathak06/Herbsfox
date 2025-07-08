@@ -19,21 +19,21 @@ const Home = () => {
     },
     {
       id: 2,
-      src: "/choti peepal.webp",
+      src: "/images/choti peepal.webp",
       caption: "Choti-peepal",
       caption2: "Rs.283.00-Rs.927.00",
       link: "/products/chotipeepal",
     },
     {
       id: 3,
-      src: "/ashwgandha.webp",
+      src: "/images/ashwgandha.webp",
       caption: "Ashwagandha",
       caption2: "Rs.264.00-Rs.767.00",
       link: "/products/Ashwagandha",
     },
     {
       id: 4,
-      src: "/badiyaan.webp",
+      src: "/images/badiyaan.webp",
       caption: "Badiyaan",
       caption2: "Rs.268.00-Rs.804.00",
       link: "/products/badiyaan",
@@ -48,7 +48,7 @@ const Home = () => {
     navigate(link);
   };
 
-  const images = ["/2-desk.jpg", "/hfs1.jpg"];
+  const images = ["/images/2-desk.jpg", "/images/hfs1.jpg"];
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -88,7 +88,7 @@ const Home = () => {
       <section className="image-grid">
         <div>
           <img
-            src="/1-home-raw-herbs.webp"
+            src="/images/1-home-raw-herbs.webp"
             className="home"
             alt="Raw Herbs"
             onClick={redirectherbs}
@@ -96,17 +96,17 @@ const Home = () => {
         </div>
         <div>
           <img
-            src="/2-home-raw-raw-spice.webp"
+            src="/images/2-home-raw-raw-spice.webp"
             alt="Raw Spices"
             onClick={redirectspices}
           />
         </div>
         <div>
-          <img src="/3-home-seeds.webp" alt="Seeds" onClick={redirectseeds} />
+          <img src="/images/3-home-seeds.webp" alt="Seeds" onClick={redirectseeds} />
         </div>
         <div>
           <img
-            src="/4-home-pooja-items.webp"
+            src="/images/4-home-pooja-items.webp"
             alt="Pooja Items"
             onClick={redirectpoojaitems}
           />

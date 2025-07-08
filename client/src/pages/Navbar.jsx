@@ -60,7 +60,7 @@ const Navbar = () => {
       {/* Logo and Hamburger */}
       <div className="navbar-top">
         <p className="logo">
-          <img src="/logo1.png" alt="logo" />
+          <img src="/images/logo1.png" alt="logo" />
         </p>
         <button className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
           ☰
