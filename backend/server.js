@@ -9,6 +9,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const app = express();
+const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [];
 // const authenticateToken = require("./middleware/authenticateToken"); // adjust path if needed
 
 app.use(cookieParser());
@@ -40,11 +41,18 @@ app.use(express.json());
 // })();
 
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN ,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 };
+
 app.use(cors(corsOptions));
 
 const isValidEmail = (email) => {
@@ -986,6 +994,82 @@ app.put("/admin/orders/:orderId/update-status", authenticateJWT, async (req, res
     res.status(500).json({ message: "Server error while updating status." });
   }
 });
+
+// 🔒 Get all products (optionally filtered by category)
+// Get all products
+app.get("/api/products", async (req, res) => {
+  try {
+    let query = "SELECT * FROM products";
+    const { category } = req.query;
+
+    if (category) {
+      query += " WHERE category = ?";
+      const [products] = await db.query(query, [category]);
+      return res.json(products);
+    }
+
+    const [products] = await db.query(query);
+    res.json(products);
+  } catch (err) {
+    console.error("Error fetching products:", err);
+    res.status(500).json({ message: "Server error while fetching products" });
+  }
+});
+
+// 🔒 Get single product by slug
+app.get("/api/products/:slug", async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const [rows] = await db.query("SELECT * FROM products WHERE slug = ?", [slug]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json(rows[0]);
+  } catch (err) {
+    console.error("❌ Failed to fetch product:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+app.post("/api/admin/products", authenticateJWT, async (req, res) => {
+  const userId = req.user.id;
+  const [adminCheck] = await db.query("SELECT is_admin FROM users WHERE id = ?", [userId]);
+  if (!adminCheck[0]?.is_admin) return res.status(403).json({ message: "Not allowed" });
+
+  const {
+    name, slug, main_image, sub_image1, sub_image2, sub_image3,
+    price_range, technical_name, about, sku, category, description
+  } = req.body;
+
+  try {
+    await db.query(
+      `INSERT INTO products 
+      (name, slug, main_image, sub_image1, sub_image2, sub_image3,
+      price_range, technical_name, about, sku, category, description)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name, slug, main_image, sub_image1, sub_image2, sub_image3,
+       price_range, technical_name, about, sku, category, description]
+    );
+    res.json({ success: true, message: "Product added" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Failed to add product" });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
 
 
 const PORT = process.env.PORT || 5000;
