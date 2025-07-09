@@ -10,7 +10,7 @@
 //   useEffect(() => {
 //   const fetchHerbs = async () => {
 //     try {
-//       const res = await fetch("https://herbsfox-1.onrender.com/products?category=herbs");
+//       const res = await fetch("https://herbsfox.onrender.com/products?category=herbs");
 //       const data = await res.json();
 
 //       const transformed = data.products.map((p) => {
@@ -369,7 +369,7 @@ import "./shop.css";
 const Herbs = () => {
   const [products, setProducts] = useState([]);
 useEffect(() => {
-  axios.get(`https://herbsfox-1.onrender.com/api/products?category=herbs`)
+  axios.get(`https://herbsfox.onrender.com/api/products?category=herbs`)
 
     .then((res) => {
       const data = Array.isArray(res.data)

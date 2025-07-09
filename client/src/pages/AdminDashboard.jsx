@@ -51,7 +51,7 @@ const AdminDashboard = ({
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(
-        "https://herbsfox-1.onrender.com/admin/products",
+        "https://herbsfox.onrender.com/admin/products",
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -73,7 +73,7 @@ const AdminDashboard = ({
     try {
       const token = localStorage.getItem("token");
       await axios.post(
-        "https://herbsfox-1.onrender.com/admin/products",
+        "https://herbsfox.onrender.com/admin/products",
         newProduct,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -105,7 +105,7 @@ const AdminDashboard = ({
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(
-        "https://herbsfox-1.onrender.com/admin/orders",
+        "https://herbsfox.onrender.com/admin/orders",
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -121,7 +121,7 @@ const AdminDashboard = ({
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `https://herbsfox-1.onrender.com/admin/orders/${orderId}/status`,
+        `https://herbsfox.onrender.com/admin/orders/${orderId}/status`,
         { status: newStatus.toLowerCase() },
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
@@ -136,7 +136,7 @@ const AdminDashboard = ({
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(
-        "https://herbsfox-1.onrender.com/admin/users",
+        "https://herbsfox.onrender.com/admin/users",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -154,7 +154,7 @@ const AdminDashboard = ({
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`https://herbsfox-1.onrender.com/admin/users/${id}`, {
+      await axios.delete(`https://herbsfox.onrender.com/admin/users/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -170,7 +170,7 @@ const AdminDashboard = ({
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `https://herbsfox-1.onrender.com/admin/users/${id}/make-admin`,
+        `https://herbsfox.onrender.com/admin/users/${id}/make-admin`,
         {},
         {
           headers: {
@@ -189,7 +189,7 @@ const AdminDashboard = ({
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `https://herbsfox-1.onrender.com/admin/users/${id}/revoke-admin`,
+        `https://herbsfox.onrender.com/admin/users/${id}/revoke-admin`,
         {},
         {
           headers: {

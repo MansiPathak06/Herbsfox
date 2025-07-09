@@ -143,7 +143,7 @@ const Spices = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    axios.get(`https://herbsfox-1.onrender.com/api/products?category=spices`)
+    axios.get(`https://herbsfox.onrender.com/api/products?category=spices`)
 // 🔁 Filter by category
       .then((res) => setProducts(res.data))
       .catch((err) => console.error(err));
