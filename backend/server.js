@@ -19,25 +19,25 @@ console.log("RAZORPAY_SECRET:", process.env.RAZORPAY_SECRET);
 app.use(express.json());
 // This will help verify your Razorpay credentials
 
-(async () => {
-  const conn = await mysql.createConnection({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USER,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-  });
+// (async () => {
+//   const conn = await mysql.createConnection({
+//     host: process.env.DB_HOST,
+//     port: process.env.DB_PORT,
+//     user: process.env.DB_USER,
+//     database: process.env.DB_NAME,
+//     password: process.env.DB_PASSWORD,
+//   });
+//   const hashed = await bcrypt.hash("mansi123", 10);
 
-  const hashed = await bcrypt.hash("mansi123", 10);
+//   await conn.execute("UPDATE users SET password = ? WHERE email = ?", [
+//     hashed,
+//     "pathakmansi608@gmail.com",
+//   ]);
 
-  await conn.execute("UPDATE users SET password = ? WHERE email = ?", [
-    hashed,
-    "pathakmansi608@gmail.com",
-  ]);
 
-  console.log("Password hashed and updated!");
-  conn.end(); // Close connection after done
-})();
+//   console.log("Password hashed and updated!");
+//   conn.end(); // Close connection after done
+// })();
 
 const corsOptions = {
   origin: process.env.CORS_ORIGIN ,
@@ -63,6 +63,21 @@ const db = mysql.createPool({
   queueLimit: 0,
 });
 
+app.post('/api/update-password', async (req, res) => {
+  try {
+    const hashed = await bcrypt.hash("mansi123", 10);
+    
+    await db.execute("UPDATE users SET password = ? WHERE email = ?", [
+      hashed,
+      "pathakmansi608@gmail.com",
+    ]);
+    
+    res.json({ success: true, message: "Password updated successfully" });
+  } catch (error) {
+    console.error('Password update failed:', error);
+    res.status(500).json({ error: 'Failed to update password' });
+  }
+});
 // Initialize Razorpay with proper error handling
 let razorpay;
 try {
