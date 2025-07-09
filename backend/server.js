@@ -156,10 +156,18 @@ app.get("/test-razorpay", async (req, res) => {
 
 (async () => {
   try {
-    await db.query("SELECT 1");
+    const connection = await db.getConnection();
+    const [rows] = await connection.execute("SELECT 1 as test");
     console.log("✅ Connected to MySQL database");
+    connection.release();
   } catch (err) {
     console.error("❌ Error connecting to MySQL:", err);
+    console.error("Connection details:", {
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      database: process.env.DB_NAME,
+      port: process.env.DB_PORT
+    });
   }
 })();
 
@@ -180,7 +188,7 @@ app.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Invalid email format" });
     }
 
-    const [existing] = await db.query("SELECT * FROM users WHERE email = ?", [
+    const [existing] = await db.execute("SELECT * FROM users WHERE email = ?", [
       email,
     ]);
     if (existing.length > 0) {
@@ -189,7 +197,7 @@ app.post("/register", async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await db.query(
+    await db.execute(
       "INSERT INTO users (name, phone, email, password, is_admin) VALUES (?, ?, ?, ?, ?)",
       [name, phone, email, hashedPassword, 0]
     );
@@ -220,7 +228,7 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid email format." });
     }
 
-    const [result] = await db.query(
+    const [result] = await db.execute(
       "SELECT * FROM users WHERE email = ? OR name = ?",
       [nameOrEmail, nameOrEmail]
     );
@@ -515,14 +523,14 @@ app.get("/orders/:userId", authenticateJWT, async (req, res) => {
 
   try {
     // Get orders by user_id
-    const [orders] = await db.query(
+    const [orders] = await db.execute(
       "SELECT id, first_name, last_name, total_amount, created_at FROM orders WHERE user_id = ? ORDER BY created_at DESC",
       [userId]
     );
 
     // Fetch items for each order
     for (const order of orders) {
-      const [items] = await db.query(
+      const [items] = await db.execute(
         "SELECT product_id, name, price, quantity FROM order_items WHERE order_id = ?",
         [order.id]
       );
@@ -719,7 +727,7 @@ app.post("/contact", async (req, res) => {
     await transporter.sendMail(mailOptions);
 
     // 💾 Save to MySQL
-    await db.query(
+    await db.execute(
       `INSERT INTO contact_messages (name, email, subject, phone, message)
        VALUES (?, ?, ?, ?, ?)`,
       [name, email, subject, phone, message]
@@ -792,7 +800,7 @@ app.put("/account/update", authenticateJWT, async (req, res) => {
 
 app.get("/admin/orders", authenticateJWT, async (req, res) => {
   try {
-    const [adminCheck] = await db.query(
+    const [adminCheck] = await db.execute(
       "SELECT is_admin FROM users WHERE id = ?",
       [req.user.id]
     );
@@ -801,17 +809,17 @@ app.get("/admin/orders", authenticateJWT, async (req, res) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    const [orders] = await db.query("SELECT * FROM orders ORDER BY created_at DESC");
+    const [orders] = await db.execute("SELECT * FROM orders ORDER BY created_at DESC");
 
     for (let order of orders) {
-      const [[user]] = await db.query(
+      const [[user]] = await db.execute(
         "SELECT name, email FROM users WHERE id = ?",
         [order.user_id]
       );
       order.user_name = user?.name || "Unknown";
       order.user_email = user?.email || "Unknown";
 
-      const [items] = await db.query(
+      const [items] = await db.execute(
         "SELECT name AS product_name, quantity, price FROM order_items WHERE order_id = ?",
         [order.id]
       );
@@ -834,17 +842,17 @@ app.put("/admin/orders/:orderId/status", authenticateJWT, async (req, res) => {
   }
 
   // Admin check
-  const [adminCheck] = await db.query("SELECT is_admin FROM users WHERE id = ?", [req.user.id]);
+  const [adminCheck] = await db.execute("SELECT is_admin FROM users WHERE id = ?", [req.user.id]);
   if (!adminCheck[0]?.is_admin) {
     return res.status(403).json({ message: "Access denied" });
   }
 
   if (status === "delivered") {
     // ✅ Update delivery date
-    await db.query(`UPDATE orders SET delivery_status = ?, delivered_at = NOW() WHERE id = ?`, [status, orderId]);
+    await db.execute(`UPDATE orders SET delivery_status = ?, delivered_at = NOW() WHERE id = ?`, [status, orderId]);
 
     // ✅ Fetch user email
-    const [[order]] = await db.query(`
+    const [[order]] = await db.execute(`
       SELECT o.id, u.email, u.name
       FROM orders o
       JOIN users u ON o.user_id = u.id
@@ -871,7 +879,7 @@ app.put("/admin/orders/:orderId/status", authenticateJWT, async (req, res) => {
   }
 
   // For shipped or arrived
-  await db.query(`UPDATE orders SET delivery_status = ? WHERE id = ?`, [status, orderId]);
+  await db.execute(`UPDATE orders SET delivery_status = ? WHERE id = ?`, [status, orderId]);
   res.json({ success: true, message: `Order marked as ${status}` });
 });
 
@@ -893,13 +901,13 @@ app.get("/orders", authenticateJWT, async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const [orders] = await db.query(
+    const [orders] = await db.execute(
       "SELECT id, created_at, total_amount, payment_status, delivery_status, delivered_at FROM orders WHERE user_id = ? ORDER BY created_at DESC",
       [userId]
     );
 
     for (let order of orders) {
-      const [items] = await db.query(
+      const [items] = await db.execute(
         "SELECT name, quantity FROM order_items WHERE order_id = ?",
         [order.id]
       );
@@ -918,12 +926,12 @@ app.get("/orders", authenticateJWT, async (req, res) => {
 
 // Delete user
 app.delete("/admin/users/:id", authenticateJWT, async (req, res) => {
-  const [adminCheck] = await db.query("SELECT is_admin FROM users WHERE id = ?", [req.user.id]);
+  const [adminCheck] = await db.execute("SELECT is_admin FROM users WHERE id = ?", [req.user.id]);
   if (!adminCheck[0]?.is_admin) {
     return res.status(403).json({ message: "Access denied" });
   }
 
-  await db.query("DELETE FROM users WHERE id = ?", [req.params.id]);
+  await db.execute("DELETE FROM users WHERE id = ?", [req.params.id]);
   res.json({ success: true });
 });
 
@@ -939,7 +947,7 @@ function isAdmin(req, res, next) {
 
 // Make user an admin
 app.put("/admin/users/:id/make-admin", authenticateJWT, async (req, res) => {
-  const [adminCheck] = await db.query("SELECT is_admin FROM users WHERE id = ?", [req.user.id]);
+  const [adminCheck] = await db.execute("SELECT is_admin FROM users WHERE id = ?", [req.user.id]);
   if (!adminCheck[0]?.is_admin) {
     return res.status(403).json({ message: "Access denied" });
   }
@@ -956,7 +964,7 @@ app.put("/admin/users/:id/make-admin", authenticateJWT, async (req, res) => {
 
 // Revoke admin access
 app.put("/admin/users/:id/revoke-admin", authenticateJWT, async (req, res) => {
-  const [adminCheck] = await db.query("SELECT is_admin FROM users WHERE id = ?", [req.user.id]);
+  const [adminCheck] = await db.execute("SELECT is_admin FROM users WHERE id = ?", [req.user.id]);
   if (!adminCheck[0]?.is_admin) {
     return res.status(403).json({ message: "Access denied" });
   }
@@ -977,13 +985,13 @@ app.put("/admin/orders/:orderId/update-status", authenticateJWT, async (req, res
 
   try {
     // Check if current user is admin
-    const [adminCheck] = await db.query("SELECT is_admin FROM users WHERE id = ?", [req.user.id]);
+    const [adminCheck] = await db.execute("SELECT is_admin FROM users WHERE id = ?", [req.user.id]);
     if (!adminCheck[0]?.is_admin) {
       return res.status(403).json({ message: "Access denied. Admin only." });
     }
 
     // Update order delivery status
-    const [result] = await db.query(
+    const [result] = await db.execute(
       `UPDATE orders SET delivery_status = ?, delivered_at = ? WHERE id = ?`,
       [status, status === "delivered" ? new Date() : null, orderId]
     );
@@ -1004,11 +1012,11 @@ app.get("/api/products", async (req, res) => {
 
     if (category) {
       query += " WHERE category = ?";
-      const [products] = await db.query(query, [category]);
+      const [products] = await db.execute(query, [category]);
       return res.json(products);
     }
 
-    const [products] = await db.query(query);
+    const [products] = await db.execute(query);
     res.json(products);
   } catch (err) {
     console.error("Error fetching products:", err);
@@ -1020,7 +1028,7 @@ app.get("/api/products", async (req, res) => {
 app.get("/api/products/:slug", async (req, res) => {
   try {
     const { slug } = req.params;
-    const [rows] = await db.query("SELECT * FROM products WHERE slug = ?", [slug]);
+    const [rows] = await db.execute("SELECT * FROM products WHERE slug = ?", [slug]);
 
     if (rows.length === 0) {
       return res.status(404).json({ message: "Product not found" });
@@ -1036,7 +1044,7 @@ app.get("/api/products/:slug", async (req, res) => {
 
 app.post("/api/admin/products", authenticateJWT, async (req, res) => {
   const userId = req.user.id;
-  const [adminCheck] = await db.query("SELECT is_admin FROM users WHERE id = ?", [userId]);
+  const [adminCheck] = await db.execute("SELECT is_admin FROM users WHERE id = ?", [userId]);
   if (!adminCheck[0]?.is_admin) return res.status(403).json({ message: "Not allowed" });
 
   const {
@@ -1045,7 +1053,7 @@ app.post("/api/admin/products", authenticateJWT, async (req, res) => {
   } = req.body;
 
   try {
-    await db.query(
+    await db.execute(
       `INSERT INTO products 
       (name, slug, main_image, sub_image1, sub_image2, sub_image3,
       price_range, technical_name, about, sku, category, description)
