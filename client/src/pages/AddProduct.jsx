@@ -24,7 +24,7 @@ const AddProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("/api/admin/products", form);
+      await axios.post("/admin/products", form);
       alert("Product added successfully");
       setForm({});
     } catch (err) {

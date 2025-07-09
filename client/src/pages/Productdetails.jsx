@@ -16,7 +16,7 @@ const Productdetails = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get(`/api/products/${slug}`)
+    axios.get(`/products/${slug}`)
       .then(res => setProduct(res.data))
       .catch(err => console.error("❌ Error loading product:", err));
   }, [slug]);

@@ -1005,7 +1005,7 @@ app.put("/admin/orders/:orderId/update-status", authenticateJWT, async (req, res
 
 // 🔒 Get all products (optionally filtered by category)
 // Get all products
-app.get("/api/products", async (req, res) => {
+app.get("/products", async (req, res) => {
   try {
     let query = "SELECT * FROM products";
     const { category } = req.query;
@@ -1025,7 +1025,7 @@ app.get("/api/products", async (req, res) => {
 });
 
 // 🔒 Get single product by slug
-app.get("/api/products/:slug", async (req, res) => {
+app.get("/products/:slug", async (req, res) => {
   try {
     const { slug } = req.params;
     const [rows] = await db.execute("SELECT * FROM products WHERE slug = ?", [slug]);
@@ -1042,7 +1042,7 @@ app.get("/api/products/:slug", async (req, res) => {
 });
 
 
-app.post("/api/admin/products", authenticateJWT, async (req, res) => {
+app.post("/admin/products", authenticateJWT, async (req, res) => {
   const userId = req.user.id;
   const [adminCheck] = await db.execute("SELECT is_admin FROM users WHERE id = ?", [userId]);
   if (!adminCheck[0]?.is_admin) return res.status(403).json({ message: "Not allowed" });
