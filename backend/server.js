@@ -1041,6 +1041,22 @@ app.get("/products/:slug", async (req, res) => {
   }
 });
 
+// ✅ Admin: Get all products
+app.get("/admin/products", authenticateJWT, async (req, res) => {
+  try {
+    const [adminCheck] = await db.query("SELECT is_admin FROM users WHERE id = ?", [req.user.id]);
+    if (!adminCheck[0]?.is_admin) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const [products] = await db.query("SELECT * FROM products");
+    res.json({ success: true, products });
+  } catch (err) {
+    console.error("❌ Error fetching admin products:", err);
+    res.status(500).json({ message: "Server error while fetching admin products" });
+  }
+});
+
 
 app.post("/admin/products", authenticateJWT, async (req, res) => {
   const userId = req.user.id;
