@@ -381,7 +381,7 @@ const Shop = () => {
   const navigate = useNavigate();
 
  useEffect(() => {
-  axios.get("/api/products")
+  axios.get("/products")
     .then(res => {
       // 🔍 Check if data is inside `products` or directly an array
       const fetchedProducts = Array.isArray(res.data)

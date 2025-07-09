@@ -122,7 +122,7 @@ const Poojaitems = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    axios.get(`https://herbsfox.onrender.com/api/products?category=Poojaitems`)
+    axios.get(`https://herbsfox.onrender.com/products?category=Poojaitems`)
 // 🔁 Filter by category
       .then((res) => setProducts(res.data))
       .catch((err) => console.error(err));

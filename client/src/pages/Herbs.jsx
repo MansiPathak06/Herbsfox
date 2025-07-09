@@ -369,7 +369,7 @@ import "./shop.css";
 const Herbs = () => {
   const [products, setProducts] = useState([]);
 useEffect(() => {
-  axios.get(`https://herbsfox.onrender.com/api/products?category=herbs`)
+  axios.get(`https://herbsfox.onrender.com/products?category=herbs`)
 
     .then((res) => {
       const data = Array.isArray(res.data)
