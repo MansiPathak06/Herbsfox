@@ -3,7 +3,7 @@ import Footer from "./Footer";
 import "./checkout.css";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect} from "react";
 
 const Checkout = () => {
   const { cart } = useCart();
@@ -83,7 +83,7 @@ const Checkout = () => {
         amountInPaise
       );
 
-      const response = await fetch("https://herbsfox-1.onrender.com/create-order", {
+      const response = await fetch("https://herbsfox.onrender.com/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -123,7 +123,7 @@ const Checkout = () => {
         order_id: order.id,
         handler: async function (response) {
           const verifyRes = await fetch(
-            "https://herbsfox-1.onrender.com/verify-payment",
+            "https://herbsfox.onrender.com/verify-payment",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -136,7 +136,7 @@ const Checkout = () => {
           if (verifyData.success) {
             alert("Payment verified successfully! Order placed.");
 
-            await fetch("https://herbsfox-1.onrender.com/save-order", {
+            await fetch("https://herbsfox.onrender.com/save-order", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -203,7 +203,7 @@ const Checkout = () => {
     } else {
       alert("Order placed with Cash on Delivery.");
 
-      await fetch("https://herbsfox-1.onrender.com/save-order", {
+      await fetch("https://herbsfox.onrender.com/save-order", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

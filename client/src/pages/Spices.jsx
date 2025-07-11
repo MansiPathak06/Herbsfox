@@ -133,8 +133,10 @@
 //             {i + 1}
 //           </button>
 //         ))}
-//       </div>import React, { useEffect, useState } from "react";
+//       </div>
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+
 import ProductCard from './Productcard';
 import Footer from "./Footer";
 import "./shop.css";
