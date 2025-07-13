@@ -15,36 +15,38 @@ const Productdetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [fullscreenImage, setFullscreenImage] = useState(null);
   const { addToCart } = useCart();
-  
+
   const navigate = useNavigate();
 
-useEffect(() => {
-  console.log(
-    "👉 Fetching from:",
-    `${import.meta.env.VITE_API_BASE_URL}/products/${slug}`
-  );
+  useEffect(() => {
+    console.log(
+      "👉 Fetching from:",
+      `${import.meta.env.VITE_API_BASE_URL}/products/${slug}`
+    );
 
-  axios
-    .get(`${import.meta.env.VITE_API_BASE_URL}/products/${slug}`)
-    .then((res) => {
-      console.log("Fetched product ➤", res.data);
+    axios
+      .get(`${import.meta.env.VITE_API_BASE_URL}/products/${slug}`)
+      .then((res) => {
+        console.log("Fetched product ➤", res.data);
 
-      const productData = res.data;
+        const productData = res.data;
 
-      // ✅ Parse weight_price_map if it's a string
-      if (typeof productData.weight_price_map === "string") {
-        try {
-          productData.weight_price_map = JSON.parse(productData.weight_price_map);
-        } catch (e) {
-          console.warn("Invalid weight_price_map JSON:", e);
-          productData.weight_price_map = {};
+        // ✅ Parse weight_price_map if it's a string
+        if (typeof productData.weight_price_map === "string") {
+          try {
+            productData.weight_price_map = JSON.parse(
+              productData.weight_price_map
+            );
+          } catch (e) {
+            console.warn("Invalid weight_price_map JSON:", e);
+            productData.weight_price_map = {};
+          }
         }
-      }
 
-      setProduct(productData);
-    })
-    .catch((err) => console.error("❌ Error loading product:", err));
-}, [slug]);
+        setProduct(productData);
+      })
+      .catch((err) => console.error("❌ Error loading product:", err));
+  }, [slug]);
 
   if (!product) return <div>Loading...</div>;
 
@@ -160,9 +162,10 @@ useEffect(() => {
               DESCRIPTION
             </button>
             {showDescription && (
-              <div className="description-text">
-                <p>{product.description}</p>
-              </div>
+              <div
+                className="description-text"
+                dangerouslySetInnerHTML={{ __html: product.description }}
+              ></div>
             )}
           </div>
         </div>
