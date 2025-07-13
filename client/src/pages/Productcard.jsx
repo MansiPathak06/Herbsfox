@@ -8,7 +8,7 @@ const ProductCard = ({ product }) => {
   return (
     <div
       className="image-container"
-      onClick={() => navigate(`/products/${products.slug}`)}
+      onClick={() => navigate(`/products/${product.slug}`)}  // ✅ FIXED
     >
       <img src={product.main_image} className="herbs" alt={product.name} />
       <div className="overlay">
@@ -16,7 +16,7 @@ const ProductCard = ({ product }) => {
           className="select-button"
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/product/${product.slug}`);
+            navigate(`/products/${product.slug}`); // ✅ FIXED
           }}
         >
           Select Options
