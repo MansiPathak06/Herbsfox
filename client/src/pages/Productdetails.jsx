@@ -5,6 +5,8 @@ import "./Products.css";
 import Footer from "./Footer";
 import { useCart } from "../context/CartContext";
 import { toast } from "react-toastify";
+import hardcodedProducts from "../data/hardcodedProducts";
+
 
 const Productdetails = () => {
   const [showDescription, setShowDescription] = useState(false);
@@ -19,34 +21,36 @@ const Productdetails = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log(
-      "👉 Fetching from:",
-      `${import.meta.env.VITE_API_BASE_URL}/products/${slug}`
-    );
+  console.log(
+    "👉 Fetching from:",
+    `${import.meta.env.VITE_API_BASE_URL}/products/${slug}`
+  );
 
-    axios
-      .get(`${import.meta.env.VITE_API_BASE_URL}/products/${slug}`)
-      .then((res) => {
-        console.log("Fetched product ➤", res.data);
-
-        const productData = res.data;
-
-        // ✅ Parse weight_price_map if it's a string
-        if (typeof productData.weight_price_map === "string") {
-          try {
-            productData.weight_price_map = JSON.parse(
-              productData.weight_price_map
-            );
-          } catch (e) {
-            console.warn("Invalid weight_price_map JSON:", e);
-            productData.weight_price_map = {};
-          }
+  axios
+    .get(`${import.meta.env.VITE_API_BASE_URL}/products/${slug}`)
+    .then((res) => {
+      const productData = res.data;
+      if (typeof productData.weight_price_map === "string") {
+        try {
+          productData.weight_price_map = JSON.parse(productData.weight_price_map);
+        } catch (e) {
+          productData.weight_price_map = {};
         }
+      }
+      setProduct(productData);
+    })
+    .catch((err) => {
+      console.warn("Backend product not found, trying fallback data");
+      const fallback = hardcodedProducts.find(p => p.slug === slug);
+      if (fallback) {
+        setProduct(fallback);
+      } else {
+        console.error("❌ Product not found anywhere");
+      }
+    });
+}, [slug]); // 👈 make sure dependency array is here
 
-        setProduct(productData);
-      })
-      .catch((err) => console.error("❌ Error loading product:", err));
-  }, [slug]);
+  
 
   if (!product) return <div>Loading...</div>;
 
@@ -76,6 +80,7 @@ const Productdetails = () => {
 
   const openFullscreen = (src) => setFullscreenImage(src);
   const closeFullscreen = () => setFullscreenImage(null);
+  
 
   return (
     <div className="main-container">
@@ -112,7 +117,8 @@ const Productdetails = () => {
             <select value={selectedWeight} onChange={handleWeightChange}>
               <option value="">Choose an option</option>
               {product.weight_price_map &&
-              typeof product.weight_price_map === "object" ? (
+              typeof product.weight_price_map === "object" &&
+              Object.keys(product.weight_price_map).length > 0 ? (
                 Object.keys(product.weight_price_map).map((weight) => (
                   <option key={weight} value={weight}>
                     {weight}

@@ -77,24 +77,27 @@ const AdminDashboard = ({
     try {
       const token = localStorage.getItem("token");
       await axios.post(
-          "https://herbsfox.onrender.com/admin/products",
-          {
-            ...newProduct,
-            weight_price_map: JSON.stringify(
-              JSON.parse(newProduct.weight_price_map || "{}")
-            ),
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            withCredentials: true,
-          }
-        );
+        "https://herbsfox.onrender.com/admin/products",
+        {
+          ...newProduct,
+          weight_price_map: (() => {
+            try {
+              const parsed = JSON.parse(newProduct.weight_price_map || "{}");
+              return JSON.stringify(parsed);
+            } catch (e) {
+              alert("Invalid Weight Price Map JSON");
+              throw e;
+            }
+          })(),
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
+      );
       if (isEditing) {
-      
         alert("Product updated successfully!");
       } else {
-        
-
         alert("Product added successfully!");
       }
       setNewProduct({
@@ -447,12 +450,9 @@ const AdminDashboard = ({
                 placeholder="Full Description"
                 rows={4}
               />
-              
+
               <div className="form-buttons">
-                <button
-                  type="submit"
-                  className="admin-btn admin-btn-submit"
-                >
+                <button type="submit" className="admin-btn admin-btn-submit">
                   {isEditing ? "Update Product" : "Add Product"}
                 </button>
                 <button
