@@ -387,29 +387,26 @@ const Shop = () => {
     .get(`${import.meta.env.VITE_API_BASE_URL}/products`)
     .then((res) => {
       const backendProducts = res.data.products || [];
+      console.log("🔹 From Backend:", backendProducts);
+      console.log("🔹 From Hardcoded:", hardcodedProducts);
 
-      // Create a Map with unique slugs as keys to avoid duplicates
-      const allProducts = [...backendProducts, ...hardcodedProducts];
+      const merged = [...backendProducts, ...hardcodedProducts];
+
+      // 🧠 Deduplicate by slug
       const uniqueBySlug = Array.from(
-        new Map(allProducts.map(p => [p.slug, p])).values()
+        new Map(merged.map(p => [p.slug, p])).values()
       );
+
+      console.log("✅ Final Merged Products:", uniqueBySlug);
 
       setProducts(uniqueBySlug);
     })
     .catch((err) => {
-      console.warn("Backend failed, showing only hardcoded");
+      console.warn("❌ Backend failed");
       setProducts(hardcodedProducts);
     });
 }, []);
 
-
-  const totalPages = Math.ceil(products.length / imagesPerPage);
-  const start = (page - 1) * imagesPerPage;
-  const visibleImages = products.slice(start, start + imagesPerPage);
-
-  const handleRedirect = (slug) => {
-    navigate(`/products/${slug}`);
-  };
 
   return (
     <div className="gallery">
