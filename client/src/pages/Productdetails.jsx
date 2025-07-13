@@ -15,7 +15,7 @@ const Productdetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [fullscreenImage, setFullscreenImage] = useState(null);
   const { addToCart } = useCart();
-   const productData = res.data;
+  
   const navigate = useNavigate();
 
 useEffect(() => {
