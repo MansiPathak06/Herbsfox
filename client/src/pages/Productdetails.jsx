@@ -15,19 +15,36 @@ const Productdetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [fullscreenImage, setFullscreenImage] = useState(null);
   const { addToCart } = useCart();
+   const productData = res.data;
   const navigate = useNavigate();
 
-  useEffect(() => {
-    console.log("👉 Fetching from:", `${import.meta.env.VITE_API_BASE_URL}/products/${slug}`);
+useEffect(() => {
+  console.log(
+    "👉 Fetching from:",
+    `${import.meta.env.VITE_API_BASE_URL}/products/${slug}`
+  );
 
-    axios
-      .get(`${import.meta.env.VITE_API_BASE_URL}/products/${slug}`)
-      .then((res) => {
-        console.log("Fetched product ➤", res.data);
-        setProduct(res.data);
-      })
-      .catch((err) => console.error("❌ Error loading product:", err));
-  }, [slug]);
+  axios
+    .get(`${import.meta.env.VITE_API_BASE_URL}/products/${slug}`)
+    .then((res) => {
+      console.log("Fetched product ➤", res.data);
+
+      const productData = res.data;
+
+      // ✅ Parse weight_price_map if it's a string
+      if (typeof productData.weight_price_map === "string") {
+        try {
+          productData.weight_price_map = JSON.parse(productData.weight_price_map);
+        } catch (e) {
+          console.warn("Invalid weight_price_map JSON:", e);
+          productData.weight_price_map = {};
+        }
+      }
+
+      setProduct(productData);
+    })
+    .catch((err) => console.error("❌ Error loading product:", err));
+}, [slug]);
 
   if (!product) return <div>Loading...</div>;
 
