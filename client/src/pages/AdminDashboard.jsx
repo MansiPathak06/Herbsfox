@@ -15,6 +15,8 @@ const AdminDashboard = ({
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [fetchedProducts, setFetchedProducts] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingProductId, setEditingProductId] = useState(null);
   const [newProduct, setNewProduct] = useState({
     name: "",
     technical_name: "",
@@ -27,6 +29,8 @@ const AdminDashboard = ({
     sku: "",
     category: "",
     description: "",
+    slug: "",
+    weight_price_map: "",
   });
 
   useEffect(() => {
@@ -73,14 +77,26 @@ const AdminDashboard = ({
     try {
       const token = localStorage.getItem("token");
       await axios.post(
-        "https://herbsfox.onrender.com/admin/products",
-        newProduct,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }
-      );
-      alert("Product added successfully!");
+          "https://herbsfox.onrender.com/admin/products",
+          {
+            ...newProduct,
+            weight_price_map: JSON.stringify(
+              JSON.parse(newProduct.weight_price_map || "{}")
+            ),
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          }
+        );
+      if (isEditing) {
+      
+        alert("Product updated successfully!");
+      } else {
+        
+
+        alert("Product added successfully!");
+      }
       setNewProduct({
         name: "",
         technical_name: "",
@@ -93,11 +109,15 @@ const AdminDashboard = ({
         sku: "",
         category: "",
         description: "",
+        slug: "",
+        weight_price_map: "",
       });
+      setIsEditing(false);
+      setEditingProductId(null);
       fetchAdminProducts();
     } catch (err) {
-      console.error("Failed to add product:", err);
-      alert("Error adding product.");
+      console.error("Failed to add/update product:", err);
+      alert("Error processing product.");
     }
   };
 
@@ -135,15 +155,12 @@ const AdminDashboard = ({
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get(
-        "https://herbsfox.onrender.com/admin/users",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
+      const res = await axios.get("https://herbsfox.onrender.com/admin/users", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
       setUsers(res.data.users);
     } catch (err) {
       console.error("Failed to fetch users:", err);
@@ -222,6 +239,35 @@ const AdminDashboard = ({
       user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleEditProduct = (product) => {
+    setNewProduct({
+      ...product,
+      weight_price_map: JSON.stringify(product.weight_price_map || {}),
+    });
+    setIsEditing(true);
+    setEditingProductId(product.id);
+  };
+
+  const handleClearForm = () => {
+    setNewProduct({
+      name: "",
+      technical_name: "",
+      main_image: "",
+      sub_image1: "",
+      sub_image2: "",
+      sub_image3: "",
+      price_range: "",
+      about: "",
+      sku: "",
+      category: "",
+      description: "",
+      slug: "",
+      weight_price_map: "",
+    });
+    setIsEditing(false);
+    setEditingProductId(null);
+  };
+
   return (
     <div className="admin-dashboard">
       <h2>Welcome Admin, {userInfo?.name}</h2>
@@ -299,6 +345,10 @@ const AdminDashboard = ({
         {activeSection === "MANAGE_PRODUCTS" && (
           <div className="product-management-section">
             <h3>Product Management</h3>
+            <h4>
+              {isEditing ? `Editing: ${newProduct.name}` : "Add New Product"}
+            </h4>
+
             <form onSubmit={handleAddProduct} className="product-form">
               <input
                 type="text"
@@ -383,15 +433,36 @@ const AdminDashboard = ({
                 required
               />
               <textarea
+                name="weight_price_map"
+                value={newProduct.weight_price_map}
+                onChange={handleProductInputChange}
+                placeholder={`Weight Price Map (JSON format)\nExample: {"100g":202,"250g":255}`}
+                rows={3}
+              />
+
+              <textarea
                 name="description"
                 value={newProduct.description}
                 onChange={handleProductInputChange}
                 placeholder="Full Description"
                 rows={4}
               />
-              <button type="submit" className="admin-btn admin-btn-promote">
-                Add Product
-              </button>
+              
+              <div className="form-buttons">
+                <button
+                  type="submit"
+                  className="admin-btn admin-btn-submit"
+                >
+                  {isEditing ? "Update Product" : "Add Product"}
+                </button>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-clear"
+                  onClick={handleClearForm}
+                >
+                  Clear Form
+                </button>
+              </div>
             </form>
 
             <hr />
@@ -413,6 +484,12 @@ const AdminDashboard = ({
                     </p>
                     <p>{prod.category}</p>
                     <p>{prod.price_range}</p>
+                    <button
+                      className="admin-btn"
+                      onClick={() => handleEditProduct(prod)}
+                    >
+                      ✏️ Edit
+                    </button>
                   </div>
                 ))
               )}

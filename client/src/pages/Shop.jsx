@@ -372,7 +372,9 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Footer from "./Footer";
+
 import "./shop.css";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const Shop = () => {
   const [products, setProducts] = useState([]);
@@ -381,9 +383,13 @@ const Shop = () => {
   const navigate = useNavigate();
 
  useEffect(() => {
-  axios.get("/products")
+  axios.get(`${API_BASE_URL}/products`)
+
+
+
     .then(res => {
       // 🔍 Check if data is inside `products` or directly an array
+       console.log("✅ PRODUCT DATA:", res.data); // 👈 ADD THIS
       const fetchedProducts = Array.isArray(res.data)
         ? res.data
         : res.data.products || [];

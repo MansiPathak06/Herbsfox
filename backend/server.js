@@ -35,7 +35,6 @@ app.use(express.json());
 //     "pathakmansi608@gmail.com",
 //   ]);
 
-
 //   console.log("Password hashed and updated!");
 //   conn.end(); // Close connection after done
 // })();
@@ -71,19 +70,19 @@ const db = mysql.createPool({
   queueLimit: 0,
 });
 
-app.post('/api/update-password', async (req, res) => {
+app.post("/api/update-password", async (req, res) => {
   try {
     const hashed = await bcrypt.hash("mansi123", 10);
-    
+
     await db.execute("UPDATE users SET password = ? WHERE email = ?", [
       hashed,
       "pathakmansi608@gmail.com",
     ]);
-    
+
     res.json({ success: true, message: "Password updated successfully" });
   } catch (error) {
-    console.error('Password update failed:', error);
-    res.status(500).json({ error: 'Failed to update password' });
+    console.error("Password update failed:", error);
+    res.status(500).json({ error: "Failed to update password" });
   }
 });
 // Initialize Razorpay with proper error handling
@@ -166,7 +165,7 @@ app.get("/test-razorpay", async (req, res) => {
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       database: process.env.DB_NAME,
-      port: process.env.DB_PORT
+      port: process.env.DB_PORT,
     });
   }
 })();
@@ -183,7 +182,7 @@ app.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Please fill in all fields" });
     }
 
-     // Validate email format
+    // Validate email format
     if (!isValidEmail(email)) {
       return res.status(400).json({ message: "Invalid email format" });
     }
@@ -223,7 +222,7 @@ app.post("/login", async (req, res) => {
         .json({ message: "Email or Username and password are required." });
     }
 
-      // Optional: If the input includes '@', validate as email
+    // Optional: If the input includes '@', validate as email
     if (nameOrEmail.includes("@") && !isValidEmail(nameOrEmail)) {
       return res.status(400).json({ message: "Invalid email format." });
     }
@@ -403,7 +402,6 @@ app.post("/save-order", authenticateJWT, async (req, res) => {
   }
 });
 
-
 // Route to create Razorpay order
 
 app.post("/create-order", async (req, res) => {
@@ -547,11 +545,6 @@ app.get("/orders/:userId", authenticateJWT, async (req, res) => {
     });
   }
 });
-
-
-
-
-
 
 // Save shipping address
 app.post("/address/shipping", authenticateJWT, async (req, res) => {
@@ -740,7 +733,6 @@ app.post("/contact", async (req, res) => {
   }
 });
 
-
 // Account details section
 // server.js (or routes/user.js)
 
@@ -795,7 +787,6 @@ app.put("/account/update", authenticateJWT, async (req, res) => {
   }
 });
 
-
 // For admin dashboard-----------------
 
 app.get("/admin/orders", authenticateJWT, async (req, res) => {
@@ -809,7 +800,9 @@ app.get("/admin/orders", authenticateJWT, async (req, res) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    const [orders] = await db.execute("SELECT * FROM orders ORDER BY created_at DESC");
+    const [orders] = await db.execute(
+      "SELECT * FROM orders ORDER BY created_at DESC"
+    );
 
     for (let order of orders) {
       const [[user]] = await db.execute(
@@ -842,22 +835,31 @@ app.put("/admin/orders/:orderId/status", authenticateJWT, async (req, res) => {
   }
 
   // Admin check
-  const [adminCheck] = await db.execute("SELECT is_admin FROM users WHERE id = ?", [req.user.id]);
+  const [adminCheck] = await db.execute(
+    "SELECT is_admin FROM users WHERE id = ?",
+    [req.user.id]
+  );
   if (!adminCheck[0]?.is_admin) {
     return res.status(403).json({ message: "Access denied" });
   }
 
   if (status === "delivered") {
     // ✅ Update delivery date
-    await db.execute(`UPDATE orders SET delivery_status = ?, delivered_at = NOW() WHERE id = ?`, [status, orderId]);
+    await db.execute(
+      `UPDATE orders SET delivery_status = ?, delivered_at = NOW() WHERE id = ?`,
+      [status, orderId]
+    );
 
     // ✅ Fetch user email
-    const [[order]] = await db.execute(`
+    const [[order]] = await db.execute(
+      `
       SELECT o.id, u.email, u.name
       FROM orders o
       JOIN users u ON o.user_id = u.id
       WHERE o.id = ?
-    `, [orderId]);
+    `,
+      [orderId]
+    );
 
     // ✅ Send mail
     const transporter = nodemailer.createTransport({
@@ -879,21 +881,24 @@ app.put("/admin/orders/:orderId/status", authenticateJWT, async (req, res) => {
   }
 
   // For shipped or arrived
-  await db.execute(`UPDATE orders SET delivery_status = ? WHERE id = ?`, [status, orderId]);
+  await db.execute(`UPDATE orders SET delivery_status = ? WHERE id = ?`, [
+    status,
+    orderId,
+  ]);
   res.json({ success: true, message: `Order marked as ${status}` });
 });
 
 app.get("/admin/users", authenticateJWT, async (req, res) => {
   try {
-    const [rows] = await db.execute("SELECT id, name, email, is_admin FROM users");
+    const [rows] = await db.execute(
+      "SELECT id, name, email, is_admin FROM users"
+    );
     res.json({ users: rows });
   } catch (err) {
     console.error("Error fetching users:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
-
-
 
 // Get all orders
 // ✅ Route for regular logged-in users to fetch *their own* orders
@@ -917,16 +922,16 @@ app.get("/orders", authenticateJWT, async (req, res) => {
     res.json({ success: true, orders });
   } catch (err) {
     console.error("❌ Failed to fetch user orders:", err);
-   res.status(500).json({ message: "Server error", error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
-
-
-
 // Delete user
 app.delete("/admin/users/:id", authenticateJWT, async (req, res) => {
-  const [adminCheck] = await db.execute("SELECT is_admin FROM users WHERE id = ?", [req.user.id]);
+  const [adminCheck] = await db.execute(
+    "SELECT is_admin FROM users WHERE id = ?",
+    [req.user.id]
+  );
   if (!adminCheck[0]?.is_admin) {
     return res.status(403).json({ message: "Access denied" });
   }
@@ -934,7 +939,6 @@ app.delete("/admin/users/:id", authenticateJWT, async (req, res) => {
   await db.execute("DELETE FROM users WHERE id = ?", [req.params.id]);
   res.json({ success: true });
 });
-
 
 function isAdmin(req, res, next) {
   const user = req.user; // assume you decoded JWT or used session
@@ -947,61 +951,86 @@ function isAdmin(req, res, next) {
 
 // Make user an admin
 app.put("/admin/users/:id/make-admin", authenticateJWT, async (req, res) => {
-  const [adminCheck] = await db.execute("SELECT is_admin FROM users WHERE id = ?", [req.user.id]);
+  const [adminCheck] = await db.execute(
+    "SELECT is_admin FROM users WHERE id = ?",
+    [req.user.id]
+  );
   if (!adminCheck[0]?.is_admin) {
     return res.status(403).json({ message: "Access denied" });
   }
 
   try {
-    await db.execute("UPDATE users SET is_admin = 1 WHERE id = ?", [req.params.id]);
+    await db.execute("UPDATE users SET is_admin = 1 WHERE id = ?", [
+      req.params.id,
+    ]);
     res.json({ success: true, message: "User promoted to admin." });
   } catch (err) {
     console.error("Error promoting user:", err);
-    res.status(500).json({ success: false, message: "Server error while promoting user." });
+    res
+      .status(500)
+      .json({ success: false, message: "Server error while promoting user." });
   }
 });
 
-
 // Revoke admin access
 app.put("/admin/users/:id/revoke-admin", authenticateJWT, async (req, res) => {
-  const [adminCheck] = await db.execute("SELECT is_admin FROM users WHERE id = ?", [req.user.id]);
+  const [adminCheck] = await db.execute(
+    "SELECT is_admin FROM users WHERE id = ?",
+    [req.user.id]
+  );
   if (!adminCheck[0]?.is_admin) {
     return res.status(403).json({ message: "Access denied" });
   }
 
   try {
-    await db.execute("UPDATE users SET is_admin = 0 WHERE id = ?", [req.params.id]);
+    await db.execute("UPDATE users SET is_admin = 0 WHERE id = ?", [
+      req.params.id,
+    ]);
     res.json({ success: true, message: "Admin rights revoked." });
   } catch (err) {
     console.error("Error revoking admin:", err);
-    res.status(500).json({ success: false, message: "Server error while revoking admin." });
+    res
+      .status(500)
+      .json({ success: false, message: "Server error while revoking admin." });
   }
 });
 
 // ✅ Update delivery status of an order (Admin Only)
-app.put("/admin/orders/:orderId/update-status", authenticateJWT, async (req, res) => {
-  const { status } = req.body;
-  const { orderId } = req.params;
+app.put(
+  "/admin/orders/:orderId/update-status",
+  authenticateJWT,
+  async (req, res) => {
+    const { status } = req.body;
+    const { orderId } = req.params;
 
-  try {
-    // Check if current user is admin
-    const [adminCheck] = await db.execute("SELECT is_admin FROM users WHERE id = ?", [req.user.id]);
-    if (!adminCheck[0]?.is_admin) {
-      return res.status(403).json({ message: "Access denied. Admin only." });
+    try {
+      // Check if current user is admin
+      const [adminCheck] = await db.execute(
+        "SELECT is_admin FROM users WHERE id = ?",
+        [req.user.id]
+      );
+      if (!adminCheck[0]?.is_admin) {
+        return res.status(403).json({ message: "Access denied. Admin only." });
+      }
+
+      // Update order delivery status
+      const [result] = await db.execute(
+        `UPDATE orders SET delivery_status = ?, delivered_at = ? WHERE id = ?`,
+        [status, status === "delivered" ? new Date() : null, orderId]
+      );
+
+      res
+        .status(200)
+        .json({
+          success: true,
+          message: "Delivery status updated successfully.",
+        });
+    } catch (err) {
+      console.error("Error updating delivery status:", err);
+      res.status(500).json({ message: "Server error while updating status." });
     }
-
-    // Update order delivery status
-    const [result] = await db.execute(
-      `UPDATE orders SET delivery_status = ?, delivered_at = ? WHERE id = ?`,
-      [status, status === "delivered" ? new Date() : null, orderId]
-    );
-
-    res.status(200).json({ success: true, message: "Delivery status updated successfully." });
-  } catch (err) {
-    console.error("Error updating delivery status:", err);
-    res.status(500).json({ message: "Server error while updating status." });
   }
-});
+);
 
 // 🔒 Get all products (optionally filtered by category)
 // Get all products
@@ -1024,17 +1053,36 @@ app.get("/products", async (req, res) => {
   }
 });
 
-// 🔒 Get single product by slug
 app.get("/products/:slug", async (req, res) => {
   try {
     const { slug } = req.params;
-    const [rows] = await db.execute("SELECT * FROM products WHERE slug = ?", [slug]);
+    const [rows] = await db.execute("SELECT * FROM products WHERE slug = ?", [
+      slug,
+    ]);
 
     if (rows.length === 0) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    res.json(rows[0]);
+    const product = rows[0];
+
+    // ✅ Parse weight_price_map
+    product.weight_price_map = product.weight_price_map
+      ? JSON.parse(product.weight_price_map)
+      : {};
+
+    // ✅ Prepare sub_images array
+    product.sub_images = [
+      product.sub_image1,
+      product.sub_image2,
+      product.sub_image3,
+    ].filter(Boolean); // avoid nulls
+
+    delete product.sub_image1;
+    delete product.sub_image2;
+    delete product.sub_image3;
+
+    res.json(product);
   } catch (err) {
     console.error("❌ Failed to fetch product:", err);
     res.status(500).json({ message: "Server error" });
@@ -1044,7 +1092,10 @@ app.get("/products/:slug", async (req, res) => {
 // ✅ Admin: Get all products
 app.get("/admin/products", authenticateJWT, async (req, res) => {
   try {
-    const [adminCheck] = await db.query("SELECT is_admin FROM users WHERE id = ?", [req.user.id]);
+    const [adminCheck] = await db.query(
+      "SELECT is_admin FROM users WHERE id = ?",
+      [req.user.id]
+    );
     if (!adminCheck[0]?.is_admin) {
       return res.status(403).json({ message: "Access denied" });
     }
@@ -1053,50 +1104,138 @@ app.get("/admin/products", authenticateJWT, async (req, res) => {
     res.json({ success: true, products });
   } catch (err) {
     console.error("❌ Error fetching admin products:", err);
-    res.status(500).json({ message: "Server error while fetching admin products" });
+    res
+      .status(500)
+      .json({ message: "Server error while fetching admin products" });
   }
 });
 
-
 app.post("/admin/products", authenticateJWT, async (req, res) => {
   const userId = req.user.id;
-  const [adminCheck] = await db.execute("SELECT is_admin FROM users WHERE id = ?", [userId]);
-  if (!adminCheck[0]?.is_admin) return res.status(403).json({ message: "Not allowed" });
+  const [adminCheck] = await db.execute(
+    "SELECT is_admin FROM users WHERE id = ?",
+    [userId]
+  );
+  if (!adminCheck[0]?.is_admin)
+    return res.status(403).json({ message: "Not allowed" });
 
   const {
-    name, slug, main_image, sub_image1, sub_image2, sub_image3,
-    price_range, technical_name, about, sku, category, description
+    name,
+    slug,
+    main_image,
+    sub_image1,
+    sub_image2,
+    sub_image3,
+    price_range,
+    technical_name,
+    about,
+    sku,
+    category,
+    description,
+    weight_price_map,
   } = req.body;
+
+   // ✅ Debug log
+  console.log("📥 Incoming product data:", req.body);
 
   try {
     await db.execute(
       `INSERT INTO products 
-      (name, slug, main_image, sub_image1, sub_image2, sub_image3,
-      price_range, technical_name, about, sku, category, description)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name, slug, main_image, sub_image1, sub_image2, sub_image3,
-       price_range, technical_name, about, sku, category, description]
+  (name, slug, main_image, sub_image1, sub_image2, sub_image3,
+  price_range, technical_name, about, sku, category, description, weight_price_map)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  ON DUPLICATE KEY UPDATE 
+    name = VALUES(name),
+    main_image = VALUES(main_image),
+    sub_image1 = VALUES(sub_image1),
+    sub_image2 = VALUES(sub_image2),
+    sub_image3 = VALUES(sub_image3),
+    price_range = VALUES(price_range),
+    technical_name = VALUES(technical_name),
+    about = VALUES(about),
+    sku = VALUES(sku),
+    category = VALUES(category),
+    description = VALUES(description),
+    weight_price_map = VALUES(weight_price_map)`,
+      [
+        name,
+        slug,
+        main_image,
+        sub_image1,
+        sub_image2,
+        sub_image3,
+        price_range,
+        technical_name,
+        about,
+        sku,
+        category,
+        description,
+        JSON.stringify(weight_price_map), // ✅ Convert to JSON string
+      ]
     );
     res.json({ success: true, message: "Product added" });
   } catch (err) {
-    console.error(err);
+    console.error("❌ Product insert error:", err.message, err); // ✅ Log full error
     res.status(500).json({ success: false, message: "Failed to add product" });
   }
 });
 
+// In your backend routes file (probably routes/admin.js or similar)
 
+// Update product route
+app.put('/admin/products/:id', authenticateToken, async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const {
+      name,
+      technical_name,
+      main_image,
+      sub_image1,
+      sub_image2,
+      sub_image3,
+      price_range,
+      about,
+      sku,
+      category,
+      description,
+      slug,
+      weight_price_map
+    } = req.body;
 
+    // Update product in database
+    const result = await db.query(
+      `UPDATE products SET 
+        name = ?, 
+        technical_name = ?, 
+        main_image = ?, 
+        sub_image1 = ?, 
+        sub_image2 = ?, 
+        sub_image3 = ?, 
+        price_range = ?, 
+        about = ?, 
+        sku = ?, 
+        category = ?, 
+        description = ?, 
+        slug = ?, 
+        weight_price_map = ?,
+        
+      WHERE id = ?`,
+      [name, technical_name, main_image, sub_image1, sub_image2, sub_image3, 
+       price_range, about, sku, category, description, slug, weight_price_map, productId]
+    );
 
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
 
-
-
-
-
-
-
-
+    res.json({ message: 'Product updated successfully' });
+  } catch (error) {
+    console.error('Error updating product:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-   console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

@@ -19,7 +19,7 @@ const Contact = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("https://herbsfox-1.onrender.com/contact", {
+      const response = await fetch("https://herbsfox.onrender.com/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
