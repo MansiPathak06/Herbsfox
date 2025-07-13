@@ -383,18 +383,25 @@ const Shop = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios
-      .get(`${import.meta.env.VITE_API_BASE_URL}/products`)
-      .then((res) => {
-        const backendProducts = res.data.products || [];
-        const merged = [...backendProducts, ...hardcodedProducts];
-        setProducts(merged);
-      })
-      .catch((err) => {
-        console.warn("Backend failed, showing only hardcoded");
-        setProducts(hardcodedProducts);
-      });
-  }, []);
+  axios
+    .get(`${import.meta.env.VITE_API_BASE_URL}/products`)
+    .then((res) => {
+      const backendProducts = res.data.products || [];
+
+      // Create a Map with unique slugs as keys to avoid duplicates
+      const allProducts = [...backendProducts, ...hardcodedProducts];
+      const uniqueBySlug = Array.from(
+        new Map(allProducts.map(p => [p.slug, p])).values()
+      );
+
+      setProducts(uniqueBySlug);
+    })
+    .catch((err) => {
+      console.warn("Backend failed, showing only hardcoded");
+      setProducts(hardcodedProducts);
+    });
+}, []);
+
 
   const totalPages = Math.ceil(products.length / imagesPerPage);
   const start = (page - 1) * imagesPerPage;
