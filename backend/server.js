@@ -1183,7 +1183,7 @@ app.post("/admin/products", authenticateJWT, async (req, res) => {
 // In your backend routes file (probably routes/admin.js or similar)
 
 // Update product route
-app.put('/admin/products/:id', authenticateToken, async (req, res) => {
+app.put('/admin/products/:id',  authenticateJWT, async (req, res) => {
   try {
     const productId = req.params.id;
     const {
