@@ -383,30 +383,33 @@ const Shop = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-  axios
-    .get(`${import.meta.env.VITE_API_BASE_URL}/products`)
-    .then((res) => {
-      const backendProducts = res.data.products || [];
-      console.log("🔹 From Backend:", backendProducts);
-      console.log("🔹 From Hardcoded:", hardcodedProducts);
+    axios
+      .get(`${import.meta.env.VITE_API_BASE_URL}/products`)
+      .then((res) => {
+        const backendProducts = res.data.products || [];
+        console.log("🔹 From Backend:", backendProducts);
+        console.log("🔹 From Hardcoded:", hardcodedProducts);
 
-      const merged = [...backendProducts, ...hardcodedProducts];
+        const merged = [...backendProducts, ...hardcodedProducts];
 
-      // 🧠 Deduplicate by slug
-      const uniqueBySlug = Array.from(
-        new Map(merged.map(p => [p.slug, p])).values()
-      );
+        // 🧠 Deduplicate by slug
+        const uniqueBySlug = Array.from(
+          new Map(merged.map((p) => [p.slug, p])).values()
+        );
 
-      console.log("✅ Final Merged Products:", uniqueBySlug);
+        console.log("✅ Final Merged Products:", uniqueBySlug);
 
-      setProducts(uniqueBySlug);
-    })
-    .catch((err) => {
-      console.warn("❌ Backend failed");
-      setProducts(hardcodedProducts);
-    });
-}, []);
+        setProducts(uniqueBySlug);
+      })
+      .catch((err) => {
+        console.warn("❌ Backend failed");
+        setProducts(hardcodedProducts);
+      });
+  }, []);
 
+  const totalPages = Math.ceil(products.length / imagesPerPage);
+  const start = (page - 1) * imagesPerPage;
+  const visibleImages = products.slice(start, start + imagesPerPage);
 
   return (
     <div className="gallery">
