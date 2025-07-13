@@ -1217,11 +1217,11 @@ app.put('/admin/products/:id',  authenticateJWT, async (req, res) => {
         category = ?, 
         description = ?, 
         slug = ?, 
-        weight_price_map = ?,
+        weight_price_map = ?
         
       WHERE id = ?`,
       [name, technical_name, main_image, sub_image1, sub_image2, sub_image3, 
-       price_range, about, sku, category, description, slug, weight_price_map, productId]
+       price_range, about, sku, category, description, slug,  JSON.stringify(weight_price_map), productId]
     );
 
     if (result.affectedRows === 0) {
