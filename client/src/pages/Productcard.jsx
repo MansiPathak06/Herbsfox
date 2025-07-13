@@ -8,7 +8,7 @@ const ProductCard = ({ product }) => {
   return (
     <div
       className="image-container"
-      onClick={() => navigate(`/product/${product.slug}`)}
+      onClick={() => navigate(`/products/${products.slug}`)}
     >
       <img src={product.main_image} className="herbs" alt={product.name} />
       <div className="overlay">
