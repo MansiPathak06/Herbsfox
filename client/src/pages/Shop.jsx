@@ -383,29 +383,22 @@ const Shop = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios
-      .get(`${import.meta.env.VITE_API_BASE_URL}/products`)
-      .then((res) => {
-        const backendProducts = res.data.products || [];
-        console.log("🔹 From Backend:", backendProducts);
-        console.log("🔹 From Hardcoded:", hardcodedProducts);
+  axios.get(`${API_BASE_URL}/products`)
 
-        const merged = [...backendProducts, ...hardcodedProducts];
 
-        // 🧠 Deduplicate by slug
-        const uniqueBySlug = Array.from(
-          new Map(merged.map((p) => [p.slug, p])).values()
-        );
 
-        console.log("✅ Final Merged Products:", uniqueBySlug);
+    .then(res => {
+      // 🔍 Check if data is inside `products` or directly an array
+       console.log("✅ PRODUCT DATA:", res.data); // 👈 ADD THIS
+      const fetchedProducts = Array.isArray(res.data)
+        ? res.data
+        : res.data.products || [];
+      setProducts(fetchedProducts);
+    })
+    .catch(err => console.error("Error fetching products:", err));
+}, []);
 
-        setProducts(uniqueBySlug);
-      })
-      .catch((err) => {
-        console.warn("❌ Backend failed");
-        setProducts(hardcodedProducts);
-      });
-  }, []);
+
 
   const totalPages = Math.ceil(products.length / imagesPerPage);
   const start = (page - 1) * imagesPerPage;

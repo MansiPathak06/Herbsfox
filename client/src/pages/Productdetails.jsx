@@ -5,7 +5,6 @@ import "./Products.css";
 import Footer from "./Footer";
 import { useCart } from "../context/CartContext";
 import { toast } from "react-toastify";
-import hardcodedProducts from "../data/hardcodedProducts";
 
 
 const Productdetails = () => {
@@ -20,37 +19,31 @@ const Productdetails = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-  console.log(
-    "👉 Fetching from:",
-    `${import.meta.env.VITE_API_BASE_URL}/products/${slug}`
-  );
+   useEffect(() => {
+  const url = `${import.meta.env.VITE_API_BASE_URL}/products/${slug}`;
+  console.log("👉 Fetching from:", url);
 
   axios
-    .get(`${import.meta.env.VITE_API_BASE_URL}/products/${slug}`)
+    .get(url)
     .then((res) => {
+      console.log("Fetched product ➤", res.data);
+
       const productData = res.data;
+
       if (typeof productData.weight_price_map === "string") {
         try {
           productData.weight_price_map = JSON.parse(productData.weight_price_map);
         } catch (e) {
+          console.warn("Invalid weight_price_map JSON:", e);
           productData.weight_price_map = {};
         }
       }
+
       setProduct(productData);
     })
-    .catch((err) => {
-      console.warn("Backend product not found, trying fallback data");
-      const fallback = hardcodedProducts.find(p => p.slug === slug);
-      if (fallback) {
-        setProduct(fallback);
-      } else {
-        console.error("❌ Product not found anywhere");
-      }
-    });
-}, [slug]); // 👈 make sure dependency array is here
+    .catch((err) => console.error("❌ Error loading product:", err));
+}, [slug]);
 
-  
 
   if (!product) return <div>Loading...</div>;
 
@@ -80,7 +73,6 @@ const Productdetails = () => {
 
   const openFullscreen = (src) => setFullscreenImage(src);
   const closeFullscreen = () => setFullscreenImage(null);
-  
 
   return (
     <div className="main-container">
