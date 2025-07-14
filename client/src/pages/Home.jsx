@@ -15,7 +15,7 @@ const Home = () => {
       src: "/images/ashok-chaal-2.webp",
       caption: "Ashok-chaal",
       caption2: "Rs.202.00-Rs.255.00",
-      link: "/products/Ashokchaal",
+      link: "/products/ashok-chaal",
     },
     {
       id: 2,
