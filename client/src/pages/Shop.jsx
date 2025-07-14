@@ -383,7 +383,7 @@ const Shop = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-  axios.get(`${API_BASE_URL}/products`)
+  axios.get(`${VITE_API_BASE_URL}/products`)
 
 
 
