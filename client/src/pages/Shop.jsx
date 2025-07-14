@@ -30,6 +30,10 @@ const Shop = () => {
   const start = (page - 1) * imagesPerPage;
   const visibleImages = products.slice(start, start + imagesPerPage);
 
+  const handleRedirect = (slug) => {
+    navigate(`/products/${slug}`);
+  };
+
   return (
     <div className="gallery">
       <h1 className="shop-heading">Shop</h1>
