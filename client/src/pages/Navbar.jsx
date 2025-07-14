@@ -82,14 +82,15 @@ const Navbar = () => {
           <Link
             to="/shop"
             className="dropdown-title"
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
               setShopDropdownOpen(!shopDropdownOpen);
-              setMenuOpen(false);
+             
             }}
           >
-            SHOP
+            SHOP ▼
           </Link>
-          {(shopDropdownOpen || menuOpen) && (
+          {(shopDropdownOpen ||(menuOpen && shopDropdownOpen)) && (
             <ul className="dropdown-menu">
               <li><Link to="/herbs" onClick={() => setMenuOpen(false)}>HERBS</Link></li>
               <li><Link to="/spices" onClick={() => setMenuOpen(false)}>SPICES</Link></li>
@@ -112,12 +113,12 @@ const Navbar = () => {
             onClick={(e) => {
               e.preventDefault();
               setAccountDropdownOpen(!accountDropdownOpen);
-              setMenuOpen(false);
+             
             }}
           >
-            ACCOUNTS
+            ACCOUNTS ▼
           </Link>
-          {(accountDropdownOpen || menuOpen) && (
+          {(accountDropdownOpen || (menuOpen && accountDropdownOpen))&& (
             <ul className="dropdown-menu">
               <li><Link to="/my-account" onClick={() => setMenuOpen(false)}>MY ACCOUNT</Link></li>
               <li><Link to="/cart" onClick={() => setMenuOpen(false)}>CART</Link></li>

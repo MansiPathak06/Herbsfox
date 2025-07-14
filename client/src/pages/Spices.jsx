@@ -153,7 +153,7 @@ const Spices = () => {
 
   return (
     <div className="gallery">
-      <h1 className="shop-heading">Herbs</h1>
+      <h1 className="shop-heading">Spices</h1>
       <div className="image-row">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />

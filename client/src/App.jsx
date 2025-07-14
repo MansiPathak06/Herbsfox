@@ -85,6 +85,8 @@ import SearchResults from "./pages/SearchResults";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
 import Productdetails from "./pages/Productdetails.jsx";
 import AddProduct from "./pages/AddProduct.jsx";
+import "react-quill/dist/quill.snow.css";
+
 
 function App() {
   return (

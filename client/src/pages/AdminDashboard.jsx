@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import "./AdminDashboard.css";
 
 const AdminDashboard = ({
@@ -14,6 +16,7 @@ const AdminDashboard = ({
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
+  const [description, setDescription] = useState("");
   const [fetchedProducts, setFetchedProducts] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editingProductId, setEditingProductId] = useState(null);
@@ -419,6 +422,7 @@ const AdminDashboard = ({
                 value={newProduct.about}
                 onChange={handleProductInputChange}
                 placeholder="About Product (short)"
+                rows={4}
               />
               <input
                 type="text"
@@ -443,12 +447,13 @@ const AdminDashboard = ({
                 rows={3}
               />
 
-              <textarea
-                name="description"
+              <label htmlFor="description">Full Description</label>
+              <ReactQuill
+                theme="snow"
                 value={newProduct.description}
-                onChange={handleProductInputChange}
-                placeholder="Full Description"
-                rows={4}
+                onChange={(value) =>
+                  setNewProduct((prev) => ({ ...prev, description: value }))
+                }
               />
 
               <div className="form-buttons">
