@@ -894,7 +894,7 @@ app.put("/account/update", authenticateJWT, async (req, res) => {
 
 app.get("/admin/orders", authenticateJWT, async (req, res) => {
   try {
-    const [adminCheck] = await executeWithRetry(
+    const [[adminCheck]] = await executeWithRetry(
       "SELECT is_admin FROM users WHERE id = ?",
       [req.user.id]
     );
