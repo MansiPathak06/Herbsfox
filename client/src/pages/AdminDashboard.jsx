@@ -239,11 +239,14 @@ const AdminDashboard = ({
     }
   };
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+const filteredUsers = Array.isArray(users)
+  ? users.filter(
+      (user) =>
+        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  : [];
+
 
   const handleEditProduct = (product) => {
     setNewProduct({
