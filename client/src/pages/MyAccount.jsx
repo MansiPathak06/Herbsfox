@@ -289,7 +289,7 @@ const fetchUserOrders = async () => {
   "https://herbsfox.onrender.com/login",
   {
     nameOrEmail: loginData.nameOrEmail.trim(),
-    password: loginData.password,or
+    password: loginData.password,
   },
   {
     headers: {
