@@ -1149,7 +1149,28 @@ function isAdmin(req, res, next) {
     res.status(403).json({ message: "Access denied" });
   }
 }
-
+const isAdmin = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const result = await executeWithRetry(
+      "SELECT is_admin FROM users WHERE id = ?",
+      [userId]
+    );
+    
+    if (!result || result.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    if (!result[0].is_admin) {
+      return res.status(403).json({ message: "Access denied. Admin only." });
+    }
+    
+    next();
+  } catch (error) {
+    console.error("Admin check error:", error);
+    res.status(500).json({ message: "Server error during admin check" });
+  }
+};
 // Make user an admin
 app.put("/admin/users/:id/make-admin", authenticateJWT, async (req, res) => {
   const adminCheck = await executeWithRetry(
