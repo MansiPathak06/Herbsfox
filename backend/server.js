@@ -18,26 +18,7 @@ console.log("RAZORPAY_KEY_ID:", process.env.RAZORPAY_KEY_ID);
 console.log("RAZORPAY_SECRET:", process.env.RAZORPAY_SECRET);
 
 app.use(express.json());
-// This will help verify your Razorpay credentials
 
-// (async () => {
-//   const conn = await mysql.createConnection({
-//     host: process.env.DB_HOST,
-//     port: process.env.DB_PORT,
-//     user: process.env.DB_USER,
-//     database: process.env.DB_NAME,
-//     password: process.env.DB_PASSWORD,
-//   });
-//   const hashed = await bcrypt.hash("mansi123", 10);
-
-//   await conn.execute("UPDATE users SET password = ? WHERE email = ?", [
-//     hashed,
-//     "pathakmansi608@gmail.com",
-//   ]);
-
-//   console.log("Password hashed and updated!");
-//   conn.end(); // Close connection after done
-// })();
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -65,19 +46,112 @@ const db = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  port: process.env.DB_PORT || 3306,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+
+    // Reconnection and timeout settings
+  acquireTimeout: 60000,
+  timeout: 60000,
+  reconnect: true,
+  idleTimeout: 300000, // 5 minutes
+  maxReconnects: 3,
+
+   handleDisconnects: true,
+
+   ssl: process.env.NODE_ENV === 'production' ? {
+    rejectUnauthorized: false
+  } : false
 });
 
+
+db.on('connection', (connection) => {
+  console.log('New MySQL connection as id ' + connection.threadId);
+});
+
+db.on('error', (err) => {
+  console.error('MySQL pool error:', err);
+  if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+    console.log('MySQL connection lost, pool will handle reconnection...');
+  } else if (err.code === 'ECONNRESET') {
+    console.log('MySQL connection reset, pool will handle reconnection...');
+  }
+});
+
+// Database query wrapper with retry logic
+async function executeWithRetryWithRetry(query, params = [], maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const [result] = await db.executeWithRetry(query, params);
+      return result;
+    } catch (error) {
+      console.error(`Query attempt ${i + 1} failed:`, error.message);
+      
+      // Check if it's a connection-related error
+      if (error.code === 'ECONNRESET' || 
+          error.code === 'PROTOCOL_CONNECTION_LOST' ||
+          error.code === 'ETIMEDOUT' ||
+          error.code === 'ENOTFOUND') {
+        
+        if (i < maxRetries - 1) {
+          const delay = (i + 1) * 1000; // Exponential backoff
+          console.log(`Retrying query in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+      }
+      
+      // If it's not a connection error or we've exhausted retries, throw the error
+      throw error;
+    }
+  }
+}
+
+
+
+// Connection health check function
+async function checkConnection() {
+  try {
+    await db.executeWithRetry('SELECT 1');
+    return true;
+  } catch (error) {
+    console.error('Connection health check failed:', error);
+    return false;
+  }
+}
+
+// Middleware to ensure database connection
+const ensureConnection = async (req, res, next) => {
+  try {
+    const isHealthy = await checkConnection();
+    if (!isHealthy) {
+      return res.status(503).json({ 
+        error: 'Database connection unavailable',
+        message: 'Please try again in a moment' 
+      });
+    }
+    next();
+  } catch (error) {
+    console.error('Database connection check failed:', error);
+    return res.status(503).json({ 
+      error: 'Database connection error',
+      message: 'Please try again in a moment' 
+    });
+  }
+};
+
+
+// Update your existing password update route to use retry logic:
 app.post("/api/update-password", async (req, res) => {
   try {
     const hashed = await bcrypt.hash("mansi123", 10);
 
-    await db.execute("UPDATE users SET password = ? WHERE email = ?", [
-      hashed,
-      "pathakmansi608@gmail.com",
-    ]);
+    // Use executeWithRetryWithRetry instead of direct db.executeWithRetry
+    await executeWithRetryWithRetry(
+      "UPDATE users SET password = ? WHERE email = ?", 
+      [hashed, "pathakmansi608@gmail.com"]
+    );
 
     res.json({ success: true, message: "Password updated successfully" });
   } catch (error) {
@@ -85,6 +159,7 @@ app.post("/api/update-password", async (req, res) => {
     res.status(500).json({ error: "Failed to update password" });
   }
 });
+
 // Initialize Razorpay with proper error handling
 let razorpay;
 try {
@@ -156,7 +231,7 @@ app.get("/test-razorpay", async (req, res) => {
 (async () => {
   try {
     const connection = await db.getConnection();
-    const [rows] = await connection.execute("SELECT 1 as test");
+    const [rows] = await connection.executeWithRetry("SELECT 1 as test");
     console.log("✅ Connected to MySQL database");
     connection.release();
   } catch (err) {
@@ -167,8 +242,41 @@ app.get("/test-razorpay", async (req, res) => {
       database: process.env.DB_NAME,
       port: process.env.DB_PORT,
     });
+    
+    // Try to reconnect after a delay
+    setTimeout(async () => {
+      try {
+        const [rows] = await executeWithRetryWithRetry("SELECT 1 as test");
+        console.log("✅ Reconnected to MySQL database");
+      } catch (retryErr) {
+        console.error("❌ Reconnection failed:", retryErr);
+      }
+    }, 5000);
   }
 })();
+
+// Graceful shutdown handling
+process.on('SIGINT', async () => {
+  console.log('Received SIGINT, closing database pool...');
+  try {
+    await db.end();
+    console.log('Database pool closed.');
+  } catch (error) {
+    console.error('Error closing database pool:', error);
+  }
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  console.log('Received SIGTERM, closing database pool...');
+  try {
+    await db.end();
+    console.log('Database pool closed.');
+  } catch (error) {
+    console.error('Error closing database pool:', error);
+  }
+  process.exit(0);
+});
 
 app.get("/", (req, res) => {
   res.send("Hellllllllooooooooooo guyssssssszzzz");
@@ -187,7 +295,7 @@ app.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Invalid email format" });
     }
 
-    const [existing] = await db.execute("SELECT * FROM users WHERE email = ?", [
+    const [existing] = await db.executeWithRetry("SELECT * FROM users WHERE email = ?", [
       email,
     ]);
     if (existing.length > 0) {
@@ -196,7 +304,7 @@ app.post("/register", async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await db.execute(
+    await db.executeWithRetry(
       "INSERT INTO users (name, phone, email, password, is_admin) VALUES (?, ?, ?, ?, ?)",
       [name, phone, email, hashedPassword, 0]
     );
@@ -227,7 +335,7 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid email format." });
     }
 
-    const [result] = await db.execute(
+    const [result] = await db.executeWithRetry(
       "SELECT * FROM users WHERE email = ? OR name = ?",
       [nameOrEmail, nameOrEmail]
     );
@@ -521,14 +629,14 @@ app.get("/orders/:userId", authenticateJWT, async (req, res) => {
 
   try {
     // Get orders by user_id
-    const [orders] = await db.execute(
+    const [orders] = await db.executeWithRetry(
       "SELECT id, first_name, last_name, total_amount, created_at FROM orders WHERE user_id = ? ORDER BY created_at DESC",
       [userId]
     );
 
     // Fetch items for each order
     for (const order of orders) {
-      const [items] = await db.execute(
+      const [items] = await db.executeWithRetry(
         "SELECT product_id, name, price, quantity FROM order_items WHERE order_id = ?",
         [order.id]
       );
@@ -720,7 +828,7 @@ app.post("/contact", async (req, res) => {
     await transporter.sendMail(mailOptions);
 
     // 💾 Save to MySQL
-    await db.execute(
+    await db.executeWithRetry(
       `INSERT INTO contact_messages (name, email, subject, phone, message)
        VALUES (?, ?, ?, ?, ?)`,
       [name, email, subject, phone, message]
@@ -748,7 +856,7 @@ app.put("/account/update", authenticateJWT, async (req, res) => {
 
   try {
     // 🔍 Fetch user
-    const [users] = await db.execute("SELECT * FROM users WHERE id = ?", [
+    const [users] = await db.executeWithRetry("SELECT * FROM users WHERE id = ?", [
       userId,
     ]);
     const user = users[0];
@@ -766,7 +874,7 @@ app.put("/account/update", authenticateJWT, async (req, res) => {
     }
 
     // ✅ Update user (name, email, optionally password)
-    await db.execute(
+    await db.executeWithRetry(
       `UPDATE users SET 
         name = ?, 
         email = ?, 
@@ -791,7 +899,7 @@ app.put("/account/update", authenticateJWT, async (req, res) => {
 
 app.get("/admin/orders", authenticateJWT, async (req, res) => {
   try {
-    const [adminCheck] = await db.execute(
+    const [adminCheck] = await db.executeWithRetry(
       "SELECT is_admin FROM users WHERE id = ?",
       [req.user.id]
     );
@@ -800,19 +908,19 @@ app.get("/admin/orders", authenticateJWT, async (req, res) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    const [orders] = await db.execute(
+    const [orders] = await db.executeWithRetry(
       "SELECT * FROM orders ORDER BY created_at DESC"
     );
 
     for (let order of orders) {
-      const [[user]] = await db.execute(
+      const [[user]] = await db.executeWithRetry(
         "SELECT name, email FROM users WHERE id = ?",
         [order.user_id]
       );
       order.user_name = user?.name || "Unknown";
       order.user_email = user?.email || "Unknown";
 
-      const [items] = await db.execute(
+      const [items] = await db.executeWithRetry(
         "SELECT name AS product_name, quantity, price FROM order_items WHERE order_id = ?",
         [order.id]
       );
@@ -835,7 +943,7 @@ app.put("/admin/orders/:orderId/status", authenticateJWT, async (req, res) => {
   }
 
   // Admin check
-  const [adminCheck] = await db.execute(
+  const [adminCheck] = await db.executeWithRetry(
     "SELECT is_admin FROM users WHERE id = ?",
     [req.user.id]
   );
@@ -845,13 +953,13 @@ app.put("/admin/orders/:orderId/status", authenticateJWT, async (req, res) => {
 
   if (status === "delivered") {
     // ✅ Update delivery date
-    await db.execute(
+    await db.executeWithRetry(
       `UPDATE orders SET delivery_status = ?, delivered_at = NOW() WHERE id = ?`,
       [status, orderId]
     );
 
     // ✅ Fetch user email
-    const [[order]] = await db.execute(
+    const [[order]] = await db.executeWithRetry(
       `
       SELECT o.id, u.email, u.name
       FROM orders o
@@ -881,7 +989,7 @@ app.put("/admin/orders/:orderId/status", authenticateJWT, async (req, res) => {
   }
 
   // For shipped or arrived
-  await db.execute(`UPDATE orders SET delivery_status = ? WHERE id = ?`, [
+  await db.executeWithRetry(`UPDATE orders SET delivery_status = ? WHERE id = ?`, [
     status,
     orderId,
   ]);
@@ -890,7 +998,7 @@ app.put("/admin/orders/:orderId/status", authenticateJWT, async (req, res) => {
 
 app.get("/admin/users", authenticateJWT, async (req, res) => {
   try {
-    const [rows] = await db.execute(
+    const [rows] = await db.executeWithRetry(
       "SELECT id, name, email, is_admin FROM users"
     );
     res.json({ users: rows });
@@ -906,13 +1014,13 @@ app.get("/orders", authenticateJWT, async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const [orders] = await db.execute(
+    const [orders] = await db.executeWithRetry(
       "SELECT id, created_at, total_amount, payment_status, delivery_status, delivered_at FROM orders WHERE user_id = ? ORDER BY created_at DESC",
       [userId]
     );
 
     for (let order of orders) {
-      const [items] = await db.execute(
+      const [items] = await db.executeWithRetry(
         "SELECT name, quantity FROM order_items WHERE order_id = ?",
         [order.id]
       );
@@ -928,7 +1036,7 @@ app.get("/orders", authenticateJWT, async (req, res) => {
 
 // Delete user
 app.delete("/admin/users/:id", authenticateJWT, async (req, res) => {
-  const [adminCheck] = await db.execute(
+  const [adminCheck] = await db.executeWithRetry(
     "SELECT is_admin FROM users WHERE id = ?",
     [req.user.id]
   );
@@ -936,7 +1044,7 @@ app.delete("/admin/users/:id", authenticateJWT, async (req, res) => {
     return res.status(403).json({ message: "Access denied" });
   }
 
-  await db.execute("DELETE FROM users WHERE id = ?", [req.params.id]);
+  await db.executeWithRetry("DELETE FROM users WHERE id = ?", [req.params.id]);
   res.json({ success: true });
 });
 
@@ -951,7 +1059,7 @@ function isAdmin(req, res, next) {
 
 // Make user an admin
 app.put("/admin/users/:id/make-admin", authenticateJWT, async (req, res) => {
-  const [adminCheck] = await db.execute(
+  const [adminCheck] = await db.executeWithRetry(
     "SELECT is_admin FROM users WHERE id = ?",
     [req.user.id]
   );
@@ -960,7 +1068,7 @@ app.put("/admin/users/:id/make-admin", authenticateJWT, async (req, res) => {
   }
 
   try {
-    await db.execute("UPDATE users SET is_admin = 1 WHERE id = ?", [
+    await db.executeWithRetry("UPDATE users SET is_admin = 1 WHERE id = ?", [
       req.params.id,
     ]);
     res.json({ success: true, message: "User promoted to admin." });
@@ -974,7 +1082,7 @@ app.put("/admin/users/:id/make-admin", authenticateJWT, async (req, res) => {
 
 // Revoke admin access
 app.put("/admin/users/:id/revoke-admin", authenticateJWT, async (req, res) => {
-  const [adminCheck] = await db.execute(
+  const [adminCheck] = await db.executeWithRetry(
     "SELECT is_admin FROM users WHERE id = ?",
     [req.user.id]
   );
@@ -983,7 +1091,7 @@ app.put("/admin/users/:id/revoke-admin", authenticateJWT, async (req, res) => {
   }
 
   try {
-    await db.execute("UPDATE users SET is_admin = 0 WHERE id = ?", [
+    await db.executeWithRetry("UPDATE users SET is_admin = 0 WHERE id = ?", [
       req.params.id,
     ]);
     res.json({ success: true, message: "Admin rights revoked." });
@@ -1005,7 +1113,7 @@ app.put(
 
     try {
       // Check if current user is admin
-      const [adminCheck] = await db.execute(
+      const [adminCheck] = await db.executeWithRetry(
         "SELECT is_admin FROM users WHERE id = ?",
         [req.user.id]
       );
@@ -1014,7 +1122,7 @@ app.put(
       }
 
       // Update order delivery status
-      const [result] = await db.execute(
+      const [result] = await db.executeWithRetry(
         `UPDATE orders SET delivery_status = ?, delivered_at = ? WHERE id = ?`,
         [status, status === "delivered" ? new Date() : null, orderId]
       );
@@ -1041,11 +1149,11 @@ app.get("/products", async (req, res) => {
 
     if (category) {
       query += " WHERE category = ?";
-      const [products] = await db.execute(query, [category]);
+      const [products] = await db.executeWithRetry(query, [category]);
       return res.json(products);
     }
 
-    const [products] = await db.execute(query);
+    const [products] = await db.executeWithRetry(query);
     res.json(products);
   } catch (err) {
     console.error("Error fetching products:", err);
@@ -1056,7 +1164,7 @@ app.get("/products", async (req, res) => {
 app.get("/products/:slug", async (req, res) => {
   try {
     const { slug } = req.params;
-    const [rows] = await db.execute("SELECT * FROM products WHERE slug = ?", [
+    const [rows] = await db.executeWithRetry("SELECT * FROM products WHERE slug = ?", [
       slug,
     ]);
 
@@ -1112,7 +1220,7 @@ app.get("/admin/products", authenticateJWT, async (req, res) => {
 
 app.post("/admin/products", authenticateJWT, async (req, res) => {
   const userId = req.user.id;
-  const [adminCheck] = await db.execute(
+  const [adminCheck] = await db.executeWithRetry(
     "SELECT is_admin FROM users WHERE id = ?",
     [userId]
   );
@@ -1139,7 +1247,7 @@ app.post("/admin/products", authenticateJWT, async (req, res) => {
   console.log("📥 Incoming product data:", req.body);
 
   try {
-    await db.execute(
+    await db.executeWithRetry(
       `INSERT INTO products 
   (name, slug, main_image, sub_image1, sub_image2, sub_image3,
   price_range, technical_name, about, sku, category, description, weight_price_map)
