@@ -291,7 +291,7 @@ app.post("/register", async (req, res) => {
       "SELECT * FROM users WHERE email = ?",
       [email]
     );
- if (result && result.length > 0) {
+    if (existing && existing.length > 0) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
@@ -1181,7 +1181,7 @@ app.get("/products/:slug", async (req, res) => {
       subImages[1] || null,
       subImages[2] || null,
     ].filter(Boolean); // avoid nulls
-   
+
     delete product.sub_image1;
     delete product.sub_image2;
     delete product.sub_image3;
