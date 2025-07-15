@@ -897,12 +897,26 @@ app.get("/admin/orders", authenticateJWT, async (req, res) => {
     console.log("🔍 Checking admin status for user:", req.user.id);
     
     // Check if user is admin
-    const [adminRows] = await executeWithRetry(
+    const adminResult = await executeWithRetry(
       "SELECT is_admin FROM users WHERE id = ?",
       [req.user.id]
     );
     
-    console.log("Admin check result:", adminRows);
+    console.log("Admin check raw result:", adminResult);
+    console.log("Admin check result type:", typeof adminResult);
+    console.log("Admin check result is array:", Array.isArray(adminResult));
+    
+    // Handle different return formats from executeWithRetry
+    let adminRows;
+    if (Array.isArray(adminResult)) {
+      adminRows = adminResult[0]; // If it returns [rows, fields]
+    } else if (adminResult && adminResult.rows) {
+      adminRows = adminResult.rows; // If it returns {rows: [], fields: []}
+    } else {
+      adminRows = adminResult; // If it returns rows directly
+    }
+    
+    console.log("Processed admin rows:", adminRows);
     
     if (!adminRows || adminRows.length === 0) {
       console.log("❌ User not found:", req.user.id);
@@ -917,9 +931,22 @@ app.get("/admin/orders", authenticateJWT, async (req, res) => {
     console.log("✅ Admin check passed, fetching orders...");
     
     // Fetch all orders
-    const [orders] = await executeWithRetry(
+    const ordersResult = await executeWithRetry(
       "SELECT * FROM orders ORDER BY created_at DESC"
     );
+    
+    console.log("Orders raw result:", ordersResult);
+    console.log("Orders result type:", typeof ordersResult);
+    
+    // Handle different return formats from executeWithRetry
+    let orders;
+    if (Array.isArray(ordersResult)) {
+      orders = ordersResult[0]; // If it returns [rows, fields]
+    } else if (ordersResult && ordersResult.rows) {
+      orders = ordersResult.rows; // If it returns {rows: [], fields: []}
+    } else {
+      orders = ordersResult; // If it returns rows directly
+    }
     
     console.log(`📦 Found ${orders.length} orders`);
 
@@ -929,20 +956,44 @@ app.get("/admin/orders", authenticateJWT, async (req, res) => {
       
       try {
         // Get user information
-        const [userRows] = await executeWithRetry(
+        const userResult = await executeWithRetry(
           "SELECT name, email FROM users WHERE id = ?",
           [order.user_id]
         );
+        
+        console.log("User result for order", order.id, ":", userResult);
+        
+        // Handle different return formats
+        let userRows;
+        if (Array.isArray(userResult)) {
+          userRows = userResult[0]; // If it returns [rows, fields]
+        } else if (userResult && userResult.rows) {
+          userRows = userResult.rows; // If it returns {rows: [], fields: []}
+        } else {
+          userRows = userResult; // If it returns rows directly
+        }
         
         const user = userRows && userRows.length > 0 ? userRows[0] : null;
         order.user_name = user?.name || "Unknown";
         order.user_email = user?.email || "Unknown";
 
         // Get order items
-        const [items] = await executeWithRetry(
+        const itemsResult = await executeWithRetry(
           "SELECT name AS product_name, quantity, price FROM order_items WHERE order_id = ?",
           [order.id]
         );
+        
+        console.log("Items result for order", order.id, ":", itemsResult);
+        
+        // Handle different return formats
+        let items;
+        if (Array.isArray(itemsResult)) {
+          items = itemsResult[0]; // If it returns [rows, fields]
+        } else if (itemsResult && itemsResult.rows) {
+          items = itemsResult.rows; // If it returns {rows: [], fields: []}
+        } else {
+          items = itemsResult; // If it returns rows directly
+        }
         
         order.items = items || [];
         
@@ -974,6 +1025,7 @@ app.get("/admin/orders", authenticateJWT, async (req, res) => {
     });
   }
 });
+
 
 app.put("/admin/orders/:orderId/status", authenticateJWT, async (req, res) => {
   const { orderId } = req.params;
