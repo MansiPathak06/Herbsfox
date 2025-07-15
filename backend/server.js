@@ -291,7 +291,7 @@ app.post("/register", async (req, res) => {
       "SELECT * FROM users WHERE email = ?",
       [email]
     );
-    if (existing.length > 0) {
+ if (result && result.length > 0) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
