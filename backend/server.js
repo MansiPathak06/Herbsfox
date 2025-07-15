@@ -80,7 +80,7 @@ db.on('error', (err) => {
 });
 
 // Database query wrapper with retry logic
-async function executeWithRetryWithRetry(query, params = [], maxRetries = 3) {
+async function executeWithRetry(query, params = [], maxRetries = 3) {
   for (let i = 0; i < maxRetries; i++) {
     try {
       const [result] = await executeWithRetry(query, params);
@@ -147,8 +147,8 @@ app.post("/api/update-password", async (req, res) => {
   try {
     const hashed = await bcrypt.hash("mansi123", 10);
 
-    // Use executeWithRetryWithRetry instead of direct executeWithRetry
-    await executeWithRetryWithRetry(
+    // Use executeWithRetry instead of direct executeWithRetry
+    await executeWithRetry(
       "UPDATE users SET password = ? WHERE email = ?", 
       [hashed, "pathakmansi608@gmail.com"]
     );
@@ -246,7 +246,7 @@ app.get("/test-razorpay", async (req, res) => {
     // Try to reconnect after a delay
     setTimeout(async () => {
       try {
-        const [rows] = await executeWithRetryWithRetry("SELECT 1 as test");
+        const [rows] = await executeWithRetry("SELECT 1 as test");
         console.log("✅ Reconnected to MySQL database");
       } catch (retryErr) {
         console.error("❌ Reconnection failed:", retryErr);
