@@ -287,7 +287,7 @@ app.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Invalid email format" });
     }
 
-    const [existing] = await executeWithRetry(
+    const existing = await executeWithRetry(
       "SELECT * FROM users WHERE email = ?",
       [email]
     );
@@ -330,12 +330,12 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid email format." });
     }
 
-    const [result] = await executeWithRetry(
+    const result = await executeWithRetry(
       "SELECT * FROM users WHERE email = ? OR name = ?",
       [nameOrEmail, nameOrEmail]
     );
 
-    if (result.length === 0) {
+    if (!result.length === 0) {
       return res.status(400).json({ message: "User not found." });
     }
 
