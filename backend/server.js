@@ -1141,14 +1141,7 @@ app.delete("/admin/users/:id", authenticateJWT, async (req, res) => {
   res.json({ success: true });
 });
 
-function isAdmin(req, res, next) {
-  const user = req.user; // assume you decoded JWT or used session
-  if (user && user.is_admin) {
-    next();
-  } else {
-    res.status(403).json({ message: "Access denied" });
-  }
-}
+
 const isAdmin = async (req, res, next) => {
   try {
     const userId = req.user.id;
