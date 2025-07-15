@@ -13,11 +13,12 @@ const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [];
 // const authenticateToken = require("./middleware/authenticateToken"); // adjust path if needed
 
 app.use(cookieParser());
+app.use(express.json());
 
 console.log("RAZORPAY_KEY_ID:", process.env.RAZORPAY_KEY_ID);
 console.log("RAZORPAY_SECRET:", process.env.RAZORPAY_SECRET);
 
-app.use(express.json());
+
 
 
 const corsOptions = {
@@ -40,8 +41,9 @@ const isValidEmail = (email) => {
   return emailRegex.test(email);
 };
 
-// MySQL connection
-const db = mysql.createPool({
+
+// MySQL connection configuration - FIXED to prevent SSL errors
+const dbConfig = {
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -50,73 +52,80 @@ const db = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-
-    // Reconnection and timeout settings
   acquireTimeout: 60000,
   timeout: 60000,
-  reconnect: true,
-  idleTimeout: 300000, // 5 minutes
-  maxReconnects: 3,
+  charset: 'utf8mb4',
+  ssl: false, // DISABLE SSL - this is the key fix
+};
 
-   handleDisconnects: true,
+// Create connection pool
+const db = mysql.createPool(dbConfig);
 
-   ssl: process.env.NODE_ENV === 'production' ? {
-    rejectUnauthorized: false
-  } : false
-});
+// FIXED: Simple database query function without recursion
+async function executeQuery(query, params = []) {
+  const connection = await db.getConnection();
+  try {
+    const [result] = await connection.execute(query, params);
+    return result;
+  } finally {
+    connection.release();
+  }
+}
 
 
 db.on('connection', (connection) => {
   console.log('New MySQL connection as id ' + connection.threadId);
 });
 
-db.on('error', (err) => {
-  console.error('MySQL pool error:', err);
-  if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-    console.log('MySQL connection lost, pool will handle reconnection...');
-  } else if (err.code === 'ECONNRESET') {
-    console.log('MySQL connection reset, pool will handle reconnection...');
-  }
-});
 
-// Database query wrapper with retry logic
+
+// FIXED: Retry wrapper that doesn't cause recursion
 async function executeWithRetry(query, params = [], maxRetries = 3) {
-  for (let i = 0; i < maxRetries; i++) {
+  let lastError;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const [result] = await executeWithRetry(query, params);
+      console.log(`Database query attempt ${attempt}`);
+      const result = await executeQuery(query, params);
+      console.log(`Query successful on attempt ${attempt}`);
       return result;
     } catch (error) {
-      console.error(`Query attempt ${i + 1} failed:`, error.message);
+      lastError = error;
+      console.error(`Query attempt ${attempt} failed:`, error.message);
       
-      // Check if it's a connection-related error
-      if (error.code === 'ECONNRESET' || 
-          error.code === 'PROTOCOL_CONNECTION_LOST' ||
-          error.code === 'ETIMEDOUT' ||
-          error.code === 'ENOTFOUND') {
-        
-        if (i < maxRetries - 1) {
-          const delay = (i + 1) * 1000; // Exponential backoff
-          console.log(`Retrying query in ${delay}ms...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-          continue;
-        }
+      // Check if it's a connection-related error worth retrying
+      const retryableErrors = [
+        'ECONNRESET',
+        'PROTOCOL_CONNECTION_LOST',
+        'ETIMEDOUT',
+        'ENOTFOUND',
+        'HANDSHAKE_NO_SSL_SUPPORT'
+      ];
+      
+      const shouldRetry = retryableErrors.includes(error.code);
+      
+      if (shouldRetry && attempt < maxRetries) {
+        const delay = attempt * 1000; // Linear backoff
+        console.log(`Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      } else if (attempt === maxRetries) {
+        console.error(`All ${maxRetries} attempts failed. Throwing error.`);
+        throw lastError;
       }
-      
-      // If it's not a connection error or we've exhausted retries, throw the error
-      throw error;
     }
   }
 }
 
 
 
+
 // Connection health check function
 async function checkConnection() {
   try {
-    await executeWithRetry('SELECT 1');
+    await executeWithRetry('SELECT 1 as test');
     return true;
   } catch (error) {
-    console.error('Connection health check failed:', error);
+    console.error('Connection health check failed:', error.message);
     return false;
   }
 }
@@ -142,18 +151,20 @@ const ensureConnection = async (req, res, next) => {
 };
 
 
-// Update your existing password update route to use retry logic:
 app.post("/api/update-password", async (req, res) => {
   try {
     const hashed = await bcrypt.hash("mansi123", 10);
-
-    // Use executeWithRetry instead of direct executeWithRetry
-    await executeWithRetry(
+    
+    const result = await executeWithRetry(
       "UPDATE users SET password = ? WHERE email = ?", 
       [hashed, "pathakmansi608@gmail.com"]
     );
 
-    res.json({ success: true, message: "Password updated successfully" });
+    res.json({ 
+      success: true, 
+      message: "Password updated successfully",
+      affected: result.affectedRows 
+    });
   } catch (error) {
     console.error("Password update failed:", error);
     res.status(500).json({ error: "Failed to update password" });
@@ -230,28 +241,18 @@ app.get("/test-razorpay", async (req, res) => {
 
 (async () => {
   try {
-    const connection = await db.getConnection();
-    const [rows] = await connection.executeWithRetry("SELECT 1 as test");
-    console.log("✅ Connected to MySQL database");
-    connection.release();
+    console.log("Testing database connection...");
+    const result = await executeWithRetry("SELECT 1 as test, NOW() as timestamp");
+    console.log("✅ Database connection successful:", result[0]);
   } catch (err) {
-    console.error("❌ Error connecting to MySQL:", err);
-    console.error("Connection details:", {
+    console.error("❌ Database connection failed:", err.message);
+    console.error("Connection config:", {
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       database: process.env.DB_NAME,
       port: process.env.DB_PORT,
+      ssl: false
     });
-    
-    // Try to reconnect after a delay
-    setTimeout(async () => {
-      try {
-        const [rows] = await executeWithRetry("SELECT 1 as test");
-        console.log("✅ Reconnected to MySQL database");
-      } catch (retryErr) {
-        console.error("❌ Reconnection failed:", retryErr);
-      }
-    }, 5000);
   }
 })();
 
