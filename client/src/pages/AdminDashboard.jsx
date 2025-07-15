@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import ReactQuill from "react-quill";
-
+import MDEditor from "@uiw/react-md-editor";
 
 import "./AdminDashboard.css";
 
@@ -449,11 +448,13 @@ const AdminDashboard = ({
               />
 
               <label htmlFor="description">Full Description</label>
-              <ReactQuill
-                theme="snow"
+              <MDEditor
                 value={newProduct.description}
                 onChange={(value) =>
-                  setNewProduct((prev) => ({ ...prev, description: value }))
+                  setNewProduct((prev) => ({
+                    ...prev,
+                    description: value || "",
+                  }))
                 }
               />
 
