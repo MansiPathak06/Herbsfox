@@ -18,9 +18,6 @@ app.use(express.json());
 console.log("RAZORPAY_KEY_ID:", process.env.RAZORPAY_KEY_ID);
 console.log("RAZORPAY_SECRET:", process.env.RAZORPAY_SECRET);
 
-
-
-
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -41,7 +38,6 @@ const isValidEmail = (email) => {
   return emailRegex.test(email);
 };
 
-
 // MySQL connection configuration - FIXED to prevent SSL errors
 const dbConfig = {
   host: process.env.DB_HOST,
@@ -54,7 +50,7 @@ const dbConfig = {
   queueLimit: 0,
   acquireTimeout: 60000,
   timeout: 60000,
-  charset: 'utf8mb4',
+  charset: "utf8mb4",
   ssl: false, // DISABLE SSL - this is the key fix
 };
 
@@ -72,17 +68,14 @@ async function executeQuery(query, params = []) {
   }
 }
 
-
-db.on('connection', (connection) => {
-  console.log('New MySQL connection as id ' + connection.threadId);
+db.on("connection", (connection) => {
+  console.log("New MySQL connection as id " + connection.threadId);
 });
-
-
 
 // FIXED: Retry wrapper that doesn't cause recursion
 async function executeWithRetry(query, params = [], maxRetries = 3) {
   let lastError;
-  
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       console.log(`Database query attempt ${attempt}`);
@@ -92,22 +85,22 @@ async function executeWithRetry(query, params = [], maxRetries = 3) {
     } catch (error) {
       lastError = error;
       console.error(`Query attempt ${attempt} failed:`, error.message);
-      
+
       // Check if it's a connection-related error worth retrying
       const retryableErrors = [
-        'ECONNRESET',
-        'PROTOCOL_CONNECTION_LOST',
-        'ETIMEDOUT',
-        'ENOTFOUND',
-        'HANDSHAKE_NO_SSL_SUPPORT'
+        "ECONNRESET",
+        "PROTOCOL_CONNECTION_LOST",
+        "ETIMEDOUT",
+        "ENOTFOUND",
+        "HANDSHAKE_NO_SSL_SUPPORT",
       ];
-      
+
       const shouldRetry = retryableErrors.includes(error.code);
-      
+
       if (shouldRetry && attempt < maxRetries) {
         const delay = attempt * 1000; // Linear backoff
         console.log(`Retrying in ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       } else if (attempt === maxRetries) {
         console.error(`All ${maxRetries} attempts failed. Throwing error.`);
         throw lastError;
@@ -116,16 +109,13 @@ async function executeWithRetry(query, params = [], maxRetries = 3) {
   }
 }
 
-
-
-
 // Connection health check function
 async function checkConnection() {
   try {
-    await executeWithRetry('SELECT 1 as test');
+    await executeWithRetry("SELECT 1 as test");
     return true;
   } catch (error) {
-    console.error('Connection health check failed:', error.message);
+    console.error("Connection health check failed:", error.message);
     return false;
   }
 }
@@ -135,35 +125,34 @@ const ensureConnection = async (req, res, next) => {
   try {
     const isHealthy = await checkConnection();
     if (!isHealthy) {
-      return res.status(503).json({ 
-        error: 'Database connection unavailable',
-        message: 'Please try again in a moment' 
+      return res.status(503).json({
+        error: "Database connection unavailable",
+        message: "Please try again in a moment",
       });
     }
     next();
   } catch (error) {
-    console.error('Database connection check failed:', error);
-    return res.status(503).json({ 
-      error: 'Database connection error',
-      message: 'Please try again in a moment' 
+    console.error("Database connection check failed:", error);
+    return res.status(503).json({
+      error: "Database connection error",
+      message: "Please try again in a moment",
     });
   }
 };
 
-
 app.post("/api/update-password", async (req, res) => {
   try {
     const hashed = await bcrypt.hash("mansi123", 10);
-    
+
     const result = await executeWithRetry(
-      "UPDATE users SET password = ? WHERE email = ?", 
+      "UPDATE users SET password = ? WHERE email = ?",
       [hashed, "pathakmansi608@gmail.com"]
     );
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       message: "Password updated successfully",
-      affected: result.affectedRows 
+      affected: result.affectedRows,
     });
   } catch (error) {
     console.error("Password update failed:", error);
@@ -242,7 +231,9 @@ app.get("/test-razorpay", async (req, res) => {
 (async () => {
   try {
     console.log("Testing database connection...");
-    const result = await executeWithRetry("SELECT 1 as test, NOW() as timestamp");
+    const result = await executeWithRetry(
+      "SELECT 1 as test, NOW() as timestamp"
+    );
     console.log("✅ Database connection successful:", result[0]);
   } catch (err) {
     console.error("❌ Database connection failed:", err.message);
@@ -251,30 +242,30 @@ app.get("/test-razorpay", async (req, res) => {
       user: process.env.DB_USER,
       database: process.env.DB_NAME,
       port: process.env.DB_PORT,
-      ssl: false
+      ssl: false,
     });
   }
 })();
 
 // Graceful shutdown handling
-process.on('SIGINT', async () => {
-  console.log('Received SIGINT, closing database pool...');
+process.on("SIGINT", async () => {
+  console.log("Received SIGINT, closing database pool...");
   try {
     await db.end();
-    console.log('Database pool closed.');
+    console.log("Database pool closed.");
   } catch (error) {
-    console.error('Error closing database pool:', error);
+    console.error("Error closing database pool:", error);
   }
   process.exit(0);
 });
 
-process.on('SIGTERM', async () => {
-  console.log('Received SIGTERM, closing database pool...');
+process.on("SIGTERM", async () => {
+  console.log("Received SIGTERM, closing database pool...");
   try {
     await db.end();
-    console.log('Database pool closed.');
+    console.log("Database pool closed.");
   } catch (error) {
-    console.error('Error closing database pool:', error);
+    console.error("Error closing database pool:", error);
   }
   process.exit(0);
 });
@@ -296,9 +287,10 @@ app.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Invalid email format" });
     }
 
-    const [existing] = await executeWithRetry("SELECT * FROM users WHERE email = ?", [
-      email,
-    ]);
+    const [existing] = await executeWithRetry(
+      "SELECT * FROM users WHERE email = ?",
+      [email]
+    );
     if (existing.length > 0) {
       return res.status(400).json({ message: "Email already exists" });
     }
@@ -1128,12 +1120,10 @@ app.put(
         [status, status === "delivered" ? new Date() : null, orderId]
       );
 
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Delivery status updated successfully.",
-        });
+      res.status(200).json({
+        success: true,
+        message: "Delivery status updated successfully.",
+      });
     } catch (err) {
       console.error("Error updating delivery status:", err);
       res.status(500).json({ message: "Server error while updating status." });
@@ -1165,9 +1155,10 @@ app.get("/products", async (req, res) => {
 app.get("/products/:slug", async (req, res) => {
   try {
     const { slug } = req.params;
-    const [rows] = await executeWithRetry("SELECT * FROM products WHERE slug = ?", [
-      slug,
-    ]);
+    const [rows] = await executeWithRetry(
+      "SELECT * FROM products WHERE slug = ?",
+      [slug]
+    );
 
     if (rows.length === 0) {
       return res.status(404).json({ message: "Product not found" });
@@ -1180,13 +1171,15 @@ app.get("/products/:slug", async (req, res) => {
       ? JSON.parse(product.weight_price_map)
       : {};
 
-    // ✅ Prepare sub_images array
+    const subImages = Array.isArray(product.sub_images)
+      ? product.sub_images
+      : [];
     product.sub_images = [
-      product.sub_image1,
-      product.sub_image2,
-      product.sub_image3,
+      subImages[0] || null,
+      subImages[1] || null,
+      subImages[2] || null,
     ].filter(Boolean); // avoid nulls
-
+   
     delete product.sub_image1;
     delete product.sub_image2;
     delete product.sub_image3;
@@ -1244,7 +1237,7 @@ app.post("/admin/products", authenticateJWT, async (req, res) => {
     weight_price_map,
   } = req.body;
 
-   // ✅ Debug log
+  // ✅ Debug log
   console.log("📥 Incoming product data:", req.body);
 
   try {
@@ -1292,7 +1285,7 @@ app.post("/admin/products", authenticateJWT, async (req, res) => {
 // In your backend routes file (probably routes/admin.js or similar)
 
 // Update product route
-app.put('/admin/products/:id',  authenticateJWT, async (req, res) => {
+app.put("/admin/products/:id", authenticateJWT, async (req, res) => {
   try {
     const productId = req.params.id;
     const {
@@ -1308,7 +1301,7 @@ app.put('/admin/products/:id',  authenticateJWT, async (req, res) => {
       category,
       description,
       slug,
-      weight_price_map
+      weight_price_map,
     } = req.body;
 
     // Update product in database
@@ -1329,18 +1322,32 @@ app.put('/admin/products/:id',  authenticateJWT, async (req, res) => {
         weight_price_map = ?
         
       WHERE id = ?`,
-      [name, technical_name, main_image, sub_image1, sub_image2, sub_image3, 
-       price_range, about, sku, category, description, slug,  JSON.stringify(weight_price_map), productId]
+      [
+        name,
+        technical_name,
+        main_image,
+        sub_image1,
+        sub_image2,
+        sub_image3,
+        price_range,
+        about,
+        sku,
+        category,
+        description,
+        slug,
+        JSON.stringify(weight_price_map),
+        productId,
+      ]
     );
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: "Product not found" });
     }
 
-    res.json({ message: 'Product updated successfully' });
+    res.json({ message: "Product updated successfully" });
   } catch (error) {
-    console.error('Error updating product:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error updating product:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
