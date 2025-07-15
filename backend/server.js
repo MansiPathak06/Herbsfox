@@ -624,14 +624,14 @@ app.get("/orders/:userId", authenticateJWT, async (req, res) => {
 
   try {
     // Get orders by user_id
-    const [orders] = await executeWithRetry(
+    const orders = await executeWithRetry(
       "SELECT id, first_name, last_name, total_amount, created_at FROM orders WHERE user_id = ? ORDER BY created_at DESC",
       [userId]
     );
 
     // Fetch items for each order
     for (const order of orders) {
-      const [items] = await executeWithRetry(
+      const items = await executeWithRetry(
         "SELECT product_id, name, price, quantity FROM order_items WHERE order_id = ?",
         [order.id]
       );
@@ -851,7 +851,7 @@ app.put("/account/update", authenticateJWT, async (req, res) => {
 
   try {
     // 🔍 Fetch user
-    const [users] = await executeWithRetry("SELECT * FROM users WHERE id = ?", [
+    const users = await executeWithRetry("SELECT * FROM users WHERE id = ?", [
       userId,
     ]);
     const user = users[0];
@@ -1036,7 +1036,7 @@ app.put("/admin/orders/:orderId/status", authenticateJWT, async (req, res) => {
   }
 
   // Admin check
-  const [adminCheck] = await executeWithRetry(
+  const adminCheck = await executeWithRetry(
     "SELECT is_admin FROM users WHERE id = ?",
     [req.user.id]
   );
@@ -1052,7 +1052,7 @@ app.put("/admin/orders/:orderId/status", authenticateJWT, async (req, res) => {
     );
 
     // ✅ Fetch user email
-    const [[order]] = await executeWithRetry(
+    const order= await executeWithRetry(
       `
       SELECT o.id, u.email, u.name
       FROM orders o
@@ -1091,7 +1091,7 @@ app.put("/admin/orders/:orderId/status", authenticateJWT, async (req, res) => {
 
 app.get("/admin/users", authenticateJWT, async (req, res) => {
   try {
-    const [rows] = await executeWithRetry(
+    const rows = await executeWithRetry(
       "SELECT id, name, email, is_admin FROM users"
     );
     res.json({ users: rows });
@@ -1107,13 +1107,13 @@ app.get("/orders", authenticateJWT, async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const [orders] = await executeWithRetry(
+    const orders = await executeWithRetry(
       "SELECT id, created_at, total_amount, payment_status, delivery_status, delivered_at FROM orders WHERE user_id = ? ORDER BY created_at DESC",
       [userId]
     );
 
     for (let order of orders) {
-      const [items] = await executeWithRetry(
+      const items = await executeWithRetry(
         "SELECT name, quantity FROM order_items WHERE order_id = ?",
         [order.id]
       );
@@ -1129,7 +1129,7 @@ app.get("/orders", authenticateJWT, async (req, res) => {
 
 // Delete user
 app.delete("/admin/users/:id", authenticateJWT, async (req, res) => {
-  const [adminCheck] = await executeWithRetry(
+  const adminCheck = await executeWithRetry(
     "SELECT is_admin FROM users WHERE id = ?",
     [req.user.id]
   );
@@ -1152,7 +1152,7 @@ function isAdmin(req, res, next) {
 
 // Make user an admin
 app.put("/admin/users/:id/make-admin", authenticateJWT, async (req, res) => {
-  const [adminCheck] = await executeWithRetry(
+  const adminCheck = await executeWithRetry(
     "SELECT is_admin FROM users WHERE id = ?",
     [req.user.id]
   );
@@ -1175,7 +1175,7 @@ app.put("/admin/users/:id/make-admin", authenticateJWT, async (req, res) => {
 
 // Revoke admin access
 app.put("/admin/users/:id/revoke-admin", authenticateJWT, async (req, res) => {
-  const [adminCheck] = await executeWithRetry(
+  const adminCheck = await executeWithRetry(
     "SELECT is_admin FROM users WHERE id = ?",
     [req.user.id]
   );
@@ -1206,7 +1206,7 @@ app.put(
 
     try {
       // Check if current user is admin
-      const [adminCheck] = await executeWithRetry(
+      const adminCheck = await executeWithRetry(
         "SELECT is_admin FROM users WHERE id = ?",
         [req.user.id]
       );
@@ -1215,7 +1215,7 @@ app.put(
       }
 
       // Update order delivery status
-      const [result] = await executeWithRetry(
+      const result = await executeWithRetry(
         `UPDATE orders SET delivery_status = ?, delivered_at = ? WHERE id = ?`,
         [status, status === "delivered" ? new Date() : null, orderId]
       );
@@ -1240,11 +1240,11 @@ app.get("/products", async (req, res) => {
 
     if (category) {
       query += " WHERE category = ?";
-      const [products] = await executeWithRetry(query, [category]);
+      const products = await executeWithRetry(query, [category]);
       return res.json(products);
     }
 
-    const [products] = await executeWithRetry(query);
+    const products = await executeWithRetry(query);
     res.json(products);
   } catch (err) {
     console.error("Error fetching products:", err);
@@ -1255,7 +1255,7 @@ app.get("/products", async (req, res) => {
 app.get("/products/:slug", async (req, res) => {
   try {
     const { slug } = req.params;
-    const [rows] = await executeWithRetry(
+    const rows = await executeWithRetry(
       "SELECT * FROM products WHERE slug = ?",
       [slug]
     );
@@ -1314,7 +1314,7 @@ app.get("/admin/products", authenticateJWT, async (req, res) => {
 
 app.post("/admin/products", authenticateJWT, async (req, res) => {
   const userId = req.user.id;
-  const [adminCheck] = await executeWithRetry(
+  const adminCheck = await executeWithRetry(
     "SELECT is_admin FROM users WHERE id = ?",
     [userId]
   );
