@@ -83,7 +83,7 @@ db.on('error', (err) => {
 async function executeWithRetryWithRetry(query, params = [], maxRetries = 3) {
   for (let i = 0; i < maxRetries; i++) {
     try {
-      const [result] = await db.executeWithRetry(query, params);
+      const [result] = await executeWithRetry(query, params);
       return result;
     } catch (error) {
       console.error(`Query attempt ${i + 1} failed:`, error.message);
@@ -113,7 +113,7 @@ async function executeWithRetryWithRetry(query, params = [], maxRetries = 3) {
 // Connection health check function
 async function checkConnection() {
   try {
-    await db.executeWithRetry('SELECT 1');
+    await executeWithRetry('SELECT 1');
     return true;
   } catch (error) {
     console.error('Connection health check failed:', error);
@@ -147,7 +147,7 @@ app.post("/api/update-password", async (req, res) => {
   try {
     const hashed = await bcrypt.hash("mansi123", 10);
 
-    // Use executeWithRetryWithRetry instead of direct db.executeWithRetry
+    // Use executeWithRetryWithRetry instead of direct executeWithRetry
     await executeWithRetryWithRetry(
       "UPDATE users SET password = ? WHERE email = ?", 
       [hashed, "pathakmansi608@gmail.com"]
@@ -295,7 +295,7 @@ app.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Invalid email format" });
     }
 
-    const [existing] = await db.executeWithRetry("SELECT * FROM users WHERE email = ?", [
+    const [existing] = await executeWithRetry("SELECT * FROM users WHERE email = ?", [
       email,
     ]);
     if (existing.length > 0) {
@@ -304,7 +304,7 @@ app.post("/register", async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await db.executeWithRetry(
+    await executeWithRetry(
       "INSERT INTO users (name, phone, email, password, is_admin) VALUES (?, ?, ?, ?, ?)",
       [name, phone, email, hashedPassword, 0]
     );
@@ -335,7 +335,7 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid email format." });
     }
 
-    const [result] = await db.executeWithRetry(
+    const [result] = await executeWithRetry(
       "SELECT * FROM users WHERE email = ? OR name = ?",
       [nameOrEmail, nameOrEmail]
     );
@@ -629,14 +629,14 @@ app.get("/orders/:userId", authenticateJWT, async (req, res) => {
 
   try {
     // Get orders by user_id
-    const [orders] = await db.executeWithRetry(
+    const [orders] = await executeWithRetry(
       "SELECT id, first_name, last_name, total_amount, created_at FROM orders WHERE user_id = ? ORDER BY created_at DESC",
       [userId]
     );
 
     // Fetch items for each order
     for (const order of orders) {
-      const [items] = await db.executeWithRetry(
+      const [items] = await executeWithRetry(
         "SELECT product_id, name, price, quantity FROM order_items WHERE order_id = ?",
         [order.id]
       );
@@ -828,7 +828,7 @@ app.post("/contact", async (req, res) => {
     await transporter.sendMail(mailOptions);
 
     // 💾 Save to MySQL
-    await db.executeWithRetry(
+    await executeWithRetry(
       `INSERT INTO contact_messages (name, email, subject, phone, message)
        VALUES (?, ?, ?, ?, ?)`,
       [name, email, subject, phone, message]
@@ -856,7 +856,7 @@ app.put("/account/update", authenticateJWT, async (req, res) => {
 
   try {
     // 🔍 Fetch user
-    const [users] = await db.executeWithRetry("SELECT * FROM users WHERE id = ?", [
+    const [users] = await executeWithRetry("SELECT * FROM users WHERE id = ?", [
       userId,
     ]);
     const user = users[0];
@@ -874,7 +874,7 @@ app.put("/account/update", authenticateJWT, async (req, res) => {
     }
 
     // ✅ Update user (name, email, optionally password)
-    await db.executeWithRetry(
+    await executeWithRetry(
       `UPDATE users SET 
         name = ?, 
         email = ?, 
@@ -899,7 +899,7 @@ app.put("/account/update", authenticateJWT, async (req, res) => {
 
 app.get("/admin/orders", authenticateJWT, async (req, res) => {
   try {
-    const [adminCheck] = await db.executeWithRetry(
+    const [adminCheck] = await executeWithRetry(
       "SELECT is_admin FROM users WHERE id = ?",
       [req.user.id]
     );
@@ -908,19 +908,19 @@ app.get("/admin/orders", authenticateJWT, async (req, res) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    const [orders] = await db.executeWithRetry(
+    const [orders] = await executeWithRetry(
       "SELECT * FROM orders ORDER BY created_at DESC"
     );
 
     for (let order of orders) {
-      const [[user]] = await db.executeWithRetry(
+      const [[user]] = await executeWithRetry(
         "SELECT name, email FROM users WHERE id = ?",
         [order.user_id]
       );
       order.user_name = user?.name || "Unknown";
       order.user_email = user?.email || "Unknown";
 
-      const [items] = await db.executeWithRetry(
+      const [items] = await executeWithRetry(
         "SELECT name AS product_name, quantity, price FROM order_items WHERE order_id = ?",
         [order.id]
       );
@@ -943,7 +943,7 @@ app.put("/admin/orders/:orderId/status", authenticateJWT, async (req, res) => {
   }
 
   // Admin check
-  const [adminCheck] = await db.executeWithRetry(
+  const [adminCheck] = await executeWithRetry(
     "SELECT is_admin FROM users WHERE id = ?",
     [req.user.id]
   );
@@ -953,13 +953,13 @@ app.put("/admin/orders/:orderId/status", authenticateJWT, async (req, res) => {
 
   if (status === "delivered") {
     // ✅ Update delivery date
-    await db.executeWithRetry(
+    await executeWithRetry(
       `UPDATE orders SET delivery_status = ?, delivered_at = NOW() WHERE id = ?`,
       [status, orderId]
     );
 
     // ✅ Fetch user email
-    const [[order]] = await db.executeWithRetry(
+    const [[order]] = await executeWithRetry(
       `
       SELECT o.id, u.email, u.name
       FROM orders o
@@ -989,7 +989,7 @@ app.put("/admin/orders/:orderId/status", authenticateJWT, async (req, res) => {
   }
 
   // For shipped or arrived
-  await db.executeWithRetry(`UPDATE orders SET delivery_status = ? WHERE id = ?`, [
+  await executeWithRetry(`UPDATE orders SET delivery_status = ? WHERE id = ?`, [
     status,
     orderId,
   ]);
@@ -998,7 +998,7 @@ app.put("/admin/orders/:orderId/status", authenticateJWT, async (req, res) => {
 
 app.get("/admin/users", authenticateJWT, async (req, res) => {
   try {
-    const [rows] = await db.executeWithRetry(
+    const [rows] = await executeWithRetry(
       "SELECT id, name, email, is_admin FROM users"
     );
     res.json({ users: rows });
@@ -1014,13 +1014,13 @@ app.get("/orders", authenticateJWT, async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const [orders] = await db.executeWithRetry(
+    const [orders] = await executeWithRetry(
       "SELECT id, created_at, total_amount, payment_status, delivery_status, delivered_at FROM orders WHERE user_id = ? ORDER BY created_at DESC",
       [userId]
     );
 
     for (let order of orders) {
-      const [items] = await db.executeWithRetry(
+      const [items] = await executeWithRetry(
         "SELECT name, quantity FROM order_items WHERE order_id = ?",
         [order.id]
       );
@@ -1036,7 +1036,7 @@ app.get("/orders", authenticateJWT, async (req, res) => {
 
 // Delete user
 app.delete("/admin/users/:id", authenticateJWT, async (req, res) => {
-  const [adminCheck] = await db.executeWithRetry(
+  const [adminCheck] = await executeWithRetry(
     "SELECT is_admin FROM users WHERE id = ?",
     [req.user.id]
   );
@@ -1044,7 +1044,7 @@ app.delete("/admin/users/:id", authenticateJWT, async (req, res) => {
     return res.status(403).json({ message: "Access denied" });
   }
 
-  await db.executeWithRetry("DELETE FROM users WHERE id = ?", [req.params.id]);
+  await executeWithRetry("DELETE FROM users WHERE id = ?", [req.params.id]);
   res.json({ success: true });
 });
 
@@ -1059,7 +1059,7 @@ function isAdmin(req, res, next) {
 
 // Make user an admin
 app.put("/admin/users/:id/make-admin", authenticateJWT, async (req, res) => {
-  const [adminCheck] = await db.executeWithRetry(
+  const [adminCheck] = await executeWithRetry(
     "SELECT is_admin FROM users WHERE id = ?",
     [req.user.id]
   );
@@ -1068,7 +1068,7 @@ app.put("/admin/users/:id/make-admin", authenticateJWT, async (req, res) => {
   }
 
   try {
-    await db.executeWithRetry("UPDATE users SET is_admin = 1 WHERE id = ?", [
+    await executeWithRetry("UPDATE users SET is_admin = 1 WHERE id = ?", [
       req.params.id,
     ]);
     res.json({ success: true, message: "User promoted to admin." });
@@ -1082,7 +1082,7 @@ app.put("/admin/users/:id/make-admin", authenticateJWT, async (req, res) => {
 
 // Revoke admin access
 app.put("/admin/users/:id/revoke-admin", authenticateJWT, async (req, res) => {
-  const [adminCheck] = await db.executeWithRetry(
+  const [adminCheck] = await executeWithRetry(
     "SELECT is_admin FROM users WHERE id = ?",
     [req.user.id]
   );
@@ -1091,7 +1091,7 @@ app.put("/admin/users/:id/revoke-admin", authenticateJWT, async (req, res) => {
   }
 
   try {
-    await db.executeWithRetry("UPDATE users SET is_admin = 0 WHERE id = ?", [
+    await executeWithRetry("UPDATE users SET is_admin = 0 WHERE id = ?", [
       req.params.id,
     ]);
     res.json({ success: true, message: "Admin rights revoked." });
@@ -1113,7 +1113,7 @@ app.put(
 
     try {
       // Check if current user is admin
-      const [adminCheck] = await db.executeWithRetry(
+      const [adminCheck] = await executeWithRetry(
         "SELECT is_admin FROM users WHERE id = ?",
         [req.user.id]
       );
@@ -1122,7 +1122,7 @@ app.put(
       }
 
       // Update order delivery status
-      const [result] = await db.executeWithRetry(
+      const [result] = await executeWithRetry(
         `UPDATE orders SET delivery_status = ?, delivered_at = ? WHERE id = ?`,
         [status, status === "delivered" ? new Date() : null, orderId]
       );
@@ -1149,11 +1149,11 @@ app.get("/products", async (req, res) => {
 
     if (category) {
       query += " WHERE category = ?";
-      const [products] = await db.executeWithRetry(query, [category]);
+      const [products] = await executeWithRetry(query, [category]);
       return res.json(products);
     }
 
-    const [products] = await db.executeWithRetry(query);
+    const [products] = await executeWithRetry(query);
     res.json(products);
   } catch (err) {
     console.error("Error fetching products:", err);
@@ -1164,7 +1164,7 @@ app.get("/products", async (req, res) => {
 app.get("/products/:slug", async (req, res) => {
   try {
     const { slug } = req.params;
-    const [rows] = await db.executeWithRetry("SELECT * FROM products WHERE slug = ?", [
+    const [rows] = await executeWithRetry("SELECT * FROM products WHERE slug = ?", [
       slug,
     ]);
 
@@ -1220,7 +1220,7 @@ app.get("/admin/products", authenticateJWT, async (req, res) => {
 
 app.post("/admin/products", authenticateJWT, async (req, res) => {
   const userId = req.user.id;
-  const [adminCheck] = await db.executeWithRetry(
+  const [adminCheck] = await executeWithRetry(
     "SELECT is_admin FROM users WHERE id = ?",
     [userId]
   );
@@ -1247,7 +1247,7 @@ app.post("/admin/products", authenticateJWT, async (req, res) => {
   console.log("📥 Incoming product data:", req.body);
 
   try {
-    await db.executeWithRetry(
+    await executeWithRetry(
       `INSERT INTO products 
   (name, slug, main_image, sub_image1, sub_image2, sub_image3,
   price_range, technical_name, about, sku, category, description, weight_price_map)
