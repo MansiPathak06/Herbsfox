@@ -285,10 +285,20 @@ const fetchUserOrders = async () => {
   }
 
     try {
-      const response = await axios.post("https://herbsfox.onrender.com/login", {
-        nameOrEmail: loginData.nameOrEmail.trim(),
-        password: loginData.password,
-      });
+      const response = await axios.post(
+  "https://herbsfox.onrender.com/login",
+  {
+    nameOrEmail: loginData.nameOrEmail.trim(),
+    password: loginData.password,or
+  },
+  {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    withCredentials: true, // ✅ This is important if backend uses cookies (yours does)
+  }
+);
+     
 
       
       alert(response.data.message || "Login successful!");

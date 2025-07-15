@@ -315,6 +315,8 @@ app.post("/register", async (req, res) => {
 // Fixed login route in server.jsx
 app.post("/login", async (req, res) => {
   try {
+    console.log("👉 Incoming req.body:", req.body);
+
     const { nameOrEmail, password } = req.body;
 
     if (!nameOrEmail || !password) {
