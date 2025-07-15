@@ -894,38 +894,84 @@ app.put("/account/update", authenticateJWT, async (req, res) => {
 
 app.get("/admin/orders", authenticateJWT, async (req, res) => {
   try {
-    const [[adminCheck]] = await executeWithRetry(
+    console.log("🔍 Checking admin status for user:", req.user.id);
+    
+    // Check if user is admin
+    const [adminRows] = await executeWithRetry(
       "SELECT is_admin FROM users WHERE id = ?",
       [req.user.id]
     );
-
-    if (!adminCheck[0]?.is_admin) {
+    
+    console.log("Admin check result:", adminRows);
+    
+    if (!adminRows || adminRows.length === 0) {
+      console.log("❌ User not found:", req.user.id);
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    if (!adminRows[0]?.is_admin) {
+      console.log("❌ Access denied for user:", req.user.id);
       return res.status(403).json({ message: "Access denied" });
     }
 
+    console.log("✅ Admin check passed, fetching orders...");
+    
+    // Fetch all orders
     const [orders] = await executeWithRetry(
       "SELECT * FROM orders ORDER BY created_at DESC"
     );
+    
+    console.log(`📦 Found ${orders.length} orders`);
 
+    // Process each order to add user info and items
     for (let order of orders) {
-      const [[user]] = await executeWithRetry(
-        "SELECT name, email FROM users WHERE id = ?",
-        [order.user_id]
-      );
-      order.user_name = user?.name || "Unknown";
-      order.user_email = user?.email || "Unknown";
+      console.log(`Processing order ${order.id} for user ${order.user_id}`);
+      
+      try {
+        // Get user information
+        const [userRows] = await executeWithRetry(
+          "SELECT name, email FROM users WHERE id = ?",
+          [order.user_id]
+        );
+        
+        const user = userRows && userRows.length > 0 ? userRows[0] : null;
+        order.user_name = user?.name || "Unknown";
+        order.user_email = user?.email || "Unknown";
 
-      const [items] = await executeWithRetry(
-        "SELECT name AS product_name, quantity, price FROM order_items WHERE order_id = ?",
-        [order.id]
-      );
-      order.items = items;
+        // Get order items
+        const [items] = await executeWithRetry(
+          "SELECT name AS product_name, quantity, price FROM order_items WHERE order_id = ?",
+          [order.id]
+        );
+        
+        order.items = items || [];
+        
+        console.log(`✅ Processed order ${order.id} with ${order.items.length} items`);
+      } catch (orderError) {
+        console.error(`❌ Error processing order ${order.id}:`, orderError);
+        // Continue processing other orders even if one fails
+        order.user_name = "Error loading user";
+        order.user_email = "Error loading user";
+        order.items = [];
+      }
     }
 
+    console.log("✅ Successfully processed all orders");
     res.json({ success: true, orders });
+    
   } catch (err) {
     console.error("❌ Failed to fetch admin orders:", err);
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("Error stack:", err.stack);
+    console.error("Request user:", req.user);
+    
+    // Send detailed error info in development, generic in production
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    
+    res.status(500).json({ 
+      message: "Server error", 
+      error: isDevelopment ? err.message : "Internal server error",
+      ...(isDevelopment && { stack: err.stack })
+    });
   }
 });
 
