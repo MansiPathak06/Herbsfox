@@ -1483,13 +1483,44 @@ app.delete("/admin/products/:id", authenticateJWT, async (req, res) => {
   }
 
   try {
-    const result = await executeWithRetry("DELETE FROM products WHERE id = ?", [
-      productId,
-    ]);
+   const [updateResult] = await db.query(
+  `UPDATE products SET 
+    name = ?, 
+    technical_name = ?, 
+    main_image = ?, 
+    sub_image1 = ?, 
+    sub_image2 = ?, 
+    sub_image3 = ?, 
+    price_range = ?, 
+    about = ?, 
+    sku = ?, 
+    category = ?, 
+    description = ?, 
+    slug = ?, 
+    weight_price_map = ?
+  WHERE id = ?`,
+  [
+    name,
+    technical_name,
+    main_image,
+    sub_image1,
+    sub_image2,
+    sub_image3,
+    price_range,
+    about,
+    sku,
+    category,
+    description,
+    slug,
+    JSON.stringify(weight_price_map),
+    productId,
+  ]
+);
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Product not found" });
-    }
+if (updateResult.affectedRows === 0) {
+  return res.status(404).json({ message: "Product not found" });
+}
+
 
     res.json({ success: true, message: "Product deleted successfully" });
   } catch (err) {
