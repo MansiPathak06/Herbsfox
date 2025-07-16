@@ -941,7 +941,7 @@ app.get("/admin/orders", authenticateJWT, async (req, res) => {
     // Handle different return formats from executeWithRetry
     let orders;
     if (Array.isArray(ordersResult)) {
-      orders = ordersResult[0]; // If it returns [rows, fields]
+      orders = ordersResult; // If it returns [rows, fields]
     } else if (ordersResult && ordersResult.rows) {
       orders = ordersResult.rows; // If it returns {rows: [], fields: []}
     } else {
@@ -966,7 +966,7 @@ app.get("/admin/orders", authenticateJWT, async (req, res) => {
         // Handle different return formats
         let userRows;
         if (Array.isArray(userResult)) {
-          userRows = userResult[0]; // If it returns [rows, fields]
+          userRows = userResult; // If it returns [rows, fields]
         } else if (userResult && userResult.rows) {
           userRows = userResult.rows; // If it returns {rows: [], fields: []}
         } else {
@@ -988,7 +988,7 @@ app.get("/admin/orders", authenticateJWT, async (req, res) => {
         // Handle different return formats
         let items;
         if (Array.isArray(itemsResult)) {
-          items = itemsResult[0]; // If it returns [rows, fields]
+          items = itemsResult; // If it returns [rows, fields]
         } else if (itemsResult && itemsResult.rows) {
           items = itemsResult.rows; // If it returns {rows: [], fields: []}
         } else {
