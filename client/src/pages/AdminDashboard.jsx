@@ -75,71 +75,70 @@ const AdminDashboard = ({
     setNewProduct((prev) => ({ ...prev, [name]: value }));
   };
 
- const handleAddProduct = async (e) => {
-  e.preventDefault();
-  try {
-    const token = localStorage.getItem("token");
-    const config = {
-      headers: { Authorization: `Bearer ${token}` },
-      withCredentials: true,
-    };
+  const handleAddProduct = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem("token");
+      const config = {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      };
 
-    const productPayload = {
-      ...newProduct,
-      weight_price_map: (() => {
-        try {
-          const parsed = JSON.parse(newProduct.weight_price_map || "{}");
-          return JSON.stringify(parsed);
-        } catch (e) {
-          alert("Invalid Weight Price Map JSON");
-          throw e;
-        }
-      })(),
-    };
+      const productPayload = {
+        ...newProduct,
+        weight_price_map: (() => {
+          try {
+            const parsed = JSON.parse(newProduct.weight_price_map || "{}");
+            return JSON.stringify(parsed);
+          } catch (e) {
+            alert("Invalid Weight Price Map JSON");
+            throw e;
+          }
+        })(),
+      };
 
-    if (isEditing && editingProductId) {
-      // ✅ PUT request for update
-      await axios.put(
-        `https://herbsfox.onrender.com/admin/products/${editingProductId}`,
-        productPayload,
-        config
-      );
-      alert("Product updated successfully!");
-    } else {
-      // ✅ POST request for new product
-      await axios.post(
-        "https://herbsfox.onrender.com/admin/products",
-        productPayload,
-        config
-      );
-      alert("Product added successfully!");
+      if (isEditing && editingProductId) {
+        // ✅ PUT request for update
+        await axios.put(
+          `https://herbsfox.onrender.com/admin/products/${editingProductId}`,
+          productPayload,
+          config
+        );
+        alert("Product updated successfully!");
+      } else {
+        // ✅ POST request for new product
+        await axios.post(
+          "https://herbsfox.onrender.com/admin/products",
+          productPayload,
+          config
+        );
+        alert("Product added successfully!");
+      }
+
+      // Reset form
+      setNewProduct({
+        name: "",
+        technical_name: "",
+        main_image: "",
+        sub_image1: "",
+        sub_image2: "",
+        sub_image3: "",
+        price_range: "",
+        about: "",
+        sku: "",
+        category: "",
+        description: "",
+        slug: "",
+        weight_price_map: "",
+      });
+      setIsEditing(false);
+      setEditingProductId(null);
+      fetchAdminProducts();
+    } catch (err) {
+      console.error("Failed to add/update product:", err);
+      alert("Error processing product.");
     }
-
-    // Reset form
-    setNewProduct({
-      name: "",
-      technical_name: "",
-      main_image: "",
-      sub_image1: "",
-      sub_image2: "",
-      sub_image3: "",
-      price_range: "",
-      about: "",
-      sku: "",
-      category: "",
-      description: "",
-      slug: "",
-      weight_price_map: "",
-    });
-    setIsEditing(false);
-    setEditingProductId(null);
-    fetchAdminProducts();
-  } catch (err) {
-    console.error("Failed to add/update product:", err);
-    alert("Error processing product.");
-  }
-};
-
+  };
 
   const fetchOrders = async () => {
     try {
@@ -253,14 +252,13 @@ const AdminDashboard = ({
     }
   };
 
-const filteredUsers = Array.isArray(users)
-  ? users.filter(
-      (user) =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  : [];
-
+  const filteredUsers = Array.isArray(users)
+    ? users.filter(
+        (user) =>
+          user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [];
 
   const handleEditProduct = (product) => {
     setNewProduct({
@@ -272,22 +270,22 @@ const filteredUsers = Array.isArray(users)
   };
 
   const handleDeleteProduct = async (id) => {
-  if (!window.confirm("Are you sure you want to delete this product?")) return;
+    if (!window.confirm("Are you sure you want to delete this product?"))
+      return;
 
-  try {
-    const token = localStorage.getItem("token");
-    await axios.delete(`https://herbsfox.onrender.com/admin/products/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-      withCredentials: true,
-    });
-    alert("Product deleted successfully!");
-    fetchAdminProducts(); // Refresh list
-  } catch (err) {
-    console.error("Failed to delete product:", err);
-    alert("Error deleting product.");
-  }
-};
-
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`https://herbsfox.onrender.com/admin/products/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      });
+      alert("Product deleted successfully!");
+      fetchAdminProducts(); // Refresh list
+    } catch (err) {
+      console.error("Failed to delete product:", err);
+      alert("Error deleting product.");
+    }
+  };
 
   const handleClearForm = () => {
     setNewProduct({
@@ -533,11 +531,11 @@ const filteredUsers = Array.isArray(users)
                       ✏️ Edit
                     </button>
                     <button
-  className="admin-btn admin-btn-delete"
-  onClick={() => handleDeleteProduct(prod.id)}
->
-  🗑️ Delete
-</button>
+                      className="admin-btn admin-btn-delete"
+                      onClick={() => handleDeleteProduct(prod.id)}
+                    >
+                      🗑️ Delete
+                    </button>
                   </div>
                 ))
               )}
