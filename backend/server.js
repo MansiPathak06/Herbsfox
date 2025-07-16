@@ -923,10 +923,10 @@ app.get("/admin/orders", authenticateJWT, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
     
-    if (!adminRows[0]?.is_admin) {
-      console.log("❌ Access denied for user:", req.user.id);
-      return res.status(403).json({ message: "Access denied" });
-    }
+   if (!adminRows?.is_admin) {
+  console.log("❌ Access denied for user:", req.user.id);
+  return res.status(403).json({ message: "Access denied" });
+}
 
     console.log("✅ Admin check passed, fetching orders...");
     
