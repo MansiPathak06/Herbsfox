@@ -88,7 +88,7 @@ const Navbar = () => {
              
             }}
           >
-            SHOP ▼
+            SHOP
           </Link>
           {(shopDropdownOpen ||(menuOpen && shopDropdownOpen)) && (
             <ul className="dropdown-menu">
@@ -116,7 +116,7 @@ const Navbar = () => {
              
             }}
           >
-            ACCOUNTS ▼
+            ACCOUNTS
           </Link>
           {(accountDropdownOpen || (menuOpen && accountDropdownOpen))&& (
             <ul className="dropdown-menu">

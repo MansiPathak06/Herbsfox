@@ -10,6 +10,11 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const app = express();
 const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [];
+
+const path = require("path");
+
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
+
 // const authenticateToken = require("./middleware/authenticateToken"); // adjust path if needed
 
 app.use(cookieParser());
