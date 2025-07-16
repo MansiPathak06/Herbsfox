@@ -515,10 +515,11 @@ const AdminDashboard = ({
                 fetchedProducts.map((prod) => (
                   <div key={prod.id} className="admin-product-card">
                     <img
-                      src={prod.main_image}
+                      src={`https://herbsfox.onrender.com/images/${prod.main_image}`}
                       alt={prod.name}
                       className="product-thumb"
                     />
+
                     <p>
                       <strong>{prod.name}</strong>
                     </p>

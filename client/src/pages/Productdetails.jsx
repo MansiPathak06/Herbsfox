@@ -6,7 +6,6 @@ import Footer from "./Footer";
 import { useCart } from "../context/CartContext";
 import { toast } from "react-toastify";
 
-
 const Productdetails = () => {
   const [showDescription, setShowDescription] = useState(false);
 
@@ -19,31 +18,32 @@ const Productdetails = () => {
 
   const navigate = useNavigate();
 
-   useEffect(() => {
-  const url = `${import.meta.env.VITE_API_BASE_URL}/products/${slug}`;
-  console.log("👉 Fetching from:", url);
+  useEffect(() => {
+    const url = `${import.meta.env.VITE_API_BASE_URL}/products/${slug}`;
+    console.log("👉 Fetching from:", url);
 
-  axios
-    .get(url)
-    .then((res) => {
-      console.log("Fetched product ➤", res.data);
+    axios
+      .get(url)
+      .then((res) => {
+        console.log("Fetched product ➤", res.data);
 
-      const productData = res.data;
+        const productData = res.data;
 
-      if (typeof productData.weight_price_map === "string") {
-        try {
-          productData.weight_price_map = JSON.parse(productData.weight_price_map);
-        } catch (e) {
-          console.warn("Invalid weight_price_map JSON:", e);
-          productData.weight_price_map = {};
+        if (typeof productData.weight_price_map === "string") {
+          try {
+            productData.weight_price_map = JSON.parse(
+              productData.weight_price_map
+            );
+          } catch (e) {
+            console.warn("Invalid weight_price_map JSON:", e);
+            productData.weight_price_map = {};
+          }
         }
-      }
 
-      setProduct(productData);
-    })
-    .catch((err) => console.error("❌ Error loading product:", err));
-}, [slug]);
-
+        setProduct(productData);
+      })
+      .catch((err) => console.error("❌ Error loading product:", err));
+  }, [slug]);
 
   if (!product) return <div>Loading...</div>;
 
@@ -74,25 +74,37 @@ const Productdetails = () => {
   const openFullscreen = (src) => setFullscreenImage(src);
   const closeFullscreen = () => setFullscreenImage(null);
 
+  const subImages = [
+    product.sub_image1,
+    product.sub_image2,
+    product.sub_image3,
+  ].filter(Boolean);
+
   return (
     <div className="main-container">
       <h1 className="shop-heading">Shop</h1>
       <div className="containers">
         <div className="leftside-container">
           <img
-            src={product.main_image}
+            src={`https://herbsfox.onrender.com/images/${product.main_image}`}
             className="image-h"
             alt={product.name}
           />
+
           <div className="sub-images">
-            {Array.isArray(product.sub_images) &&
-              product.sub_images.map((img, index) => (
+            {[product.sub_image1, product.sub_image2, product.sub_image3]
+              .filter(Boolean) // remove undefined/null/empty
+              .map((img, index) => (
                 <img
                   key={index}
-                  src={img}
+                  src={`https://herbsfox.onrender.com/images/${img}`}
                   className={`image-${index + 1}`}
                   alt={`${product.name}-${index}`}
-                  onClick={() => openFullscreen(img)}
+                  onClick={() =>
+                    openFullscreen(
+                      `https://herbsfox.onrender.com/images/${img}`
+                    )
+                  }
                 />
               ))}
           </div>
