@@ -13,7 +13,7 @@ const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [];
 
 const path = require("path");
 
-app.use('/images', express.static(path.join(__dirname, 'public/images')));
+app.use("/images", express.static(path.join(__dirname, "public/images")));
 
 // const authenticateToken = require("./middleware/authenticateToken"); // adjust path if needed
 
@@ -900,17 +900,17 @@ app.put("/account/update", authenticateJWT, async (req, res) => {
 app.get("/admin/orders", authenticateJWT, async (req, res) => {
   try {
     console.log("🔍 Checking admin status for user:", req.user.id);
-    
+
     // Check if user is admin
     const adminResult = await executeWithRetry(
       "SELECT is_admin FROM users WHERE id = ?",
       [req.user.id]
     );
-    
+
     console.log("Admin check raw result:", adminResult);
     console.log("Admin check result type:", typeof adminResult);
     console.log("Admin check result is array:", Array.isArray(adminResult));
-    
+
     // Handle different return formats from executeWithRetry
     let adminRows;
     if (Array.isArray(adminResult)) {
@@ -920,29 +920,29 @@ app.get("/admin/orders", authenticateJWT, async (req, res) => {
     } else {
       adminRows = adminResult; // If it returns rows directly
     }
-    
+
     console.log("Processed admin rows:", adminRows);
-    
+
     if (!adminRows || adminRows.length === 0) {
       console.log("❌ User not found:", req.user.id);
       return res.status(404).json({ message: "User not found" });
     }
-    
-   if (!adminRows?.is_admin) {
-  console.log("❌ Access denied for user:", req.user.id);
-  return res.status(403).json({ message: "Access denied" });
-}
+
+    if (!adminRows?.is_admin) {
+      console.log("❌ Access denied for user:", req.user.id);
+      return res.status(403).json({ message: "Access denied" });
+    }
 
     console.log("✅ Admin check passed, fetching orders...");
-    
+
     // Fetch all orders
     const ordersResult = await executeWithRetry(
       "SELECT * FROM orders ORDER BY created_at DESC"
     );
-    
+
     console.log("Orders raw result:", ordersResult);
     console.log("Orders result type:", typeof ordersResult);
-    
+
     // Handle different return formats from executeWithRetry
     let orders;
     if (Array.isArray(ordersResult)) {
@@ -952,22 +952,22 @@ app.get("/admin/orders", authenticateJWT, async (req, res) => {
     } else {
       orders = ordersResult; // If it returns rows directly
     }
-    
+
     console.log(`📦 Found ${orders.length} orders`);
 
     // Process each order to add user info and items
     for (let order of orders) {
       console.log(`Processing order ${order.id} for user ${order.user_id}`);
-      
+
       try {
         // Get user information
         const userResult = await executeWithRetry(
           "SELECT name, email FROM users WHERE id = ?",
           [order.user_id]
         );
-        
+
         console.log("User result for order", order.id, ":", userResult);
-        
+
         // Handle different return formats
         let userRows;
         if (Array.isArray(userResult)) {
@@ -977,7 +977,7 @@ app.get("/admin/orders", authenticateJWT, async (req, res) => {
         } else {
           userRows = userResult; // If it returns rows directly
         }
-        
+
         const user = userRows && userRows.length > 0 ? userRows[0] : null;
         order.user_name = user?.name || "Unknown";
         order.user_email = user?.email || "Unknown";
@@ -987,9 +987,9 @@ app.get("/admin/orders", authenticateJWT, async (req, res) => {
           "SELECT name AS product_name, quantity, price FROM order_items WHERE order_id = ?",
           [order.id]
         );
-        
+
         console.log("Items result for order", order.id, ":", itemsResult);
-        
+
         // Handle different return formats
         let items;
         if (Array.isArray(itemsResult)) {
@@ -999,10 +999,12 @@ app.get("/admin/orders", authenticateJWT, async (req, res) => {
         } else {
           items = itemsResult; // If it returns rows directly
         }
-        
+
         order.items = items || [];
-        
-        console.log(`✅ Processed order ${order.id} with ${order.items.length} items`);
+
+        console.log(
+          `✅ Processed order ${order.id} with ${order.items.length} items`
+        );
       } catch (orderError) {
         console.error(`❌ Error processing order ${order.id}:`, orderError);
         // Continue processing other orders even if one fails
@@ -1014,23 +1016,21 @@ app.get("/admin/orders", authenticateJWT, async (req, res) => {
 
     console.log("✅ Successfully processed all orders");
     res.json({ success: true, orders });
-    
   } catch (err) {
     console.error("❌ Failed to fetch admin orders:", err);
     console.error("Error stack:", err.stack);
     console.error("Request user:", req.user);
-    
+
     // Send detailed error info in development, generic in production
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    
-    res.status(500).json({ 
-      message: "Server error", 
+    const isDevelopment = process.env.NODE_ENV === "development";
+
+    res.status(500).json({
+      message: "Server error",
       error: isDevelopment ? err.message : "Internal server error",
-      ...(isDevelopment && { stack: err.stack })
+      ...(isDevelopment && { stack: err.stack }),
     });
   }
 });
-
 
 app.put("/admin/orders/:orderId/status", authenticateJWT, async (req, res) => {
   const { orderId } = req.params;
@@ -1057,7 +1057,7 @@ app.put("/admin/orders/:orderId/status", authenticateJWT, async (req, res) => {
     );
 
     // ✅ Fetch user email
-    const order= await executeWithRetry(
+    const order = await executeWithRetry(
       `
       SELECT o.id, u.email, u.name
       FROM orders o
@@ -1146,7 +1146,6 @@ app.delete("/admin/users/:id", authenticateJWT, async (req, res) => {
   res.json({ success: true });
 });
 
-
 const isAdmin = async (req, res, next) => {
   try {
     const userId = req.user.id;
@@ -1154,15 +1153,15 @@ const isAdmin = async (req, res, next) => {
       "SELECT is_admin FROM users WHERE id = ?",
       [userId]
     );
-    
+
     if (!result || result.length === 0) {
       return res.status(404).json({ message: "User not found" });
     }
-    
+
     if (!result[0].is_admin) {
       return res.status(403).json({ message: "Access denied. Admin only." });
     }
-    
+
     next();
   } catch (error) {
     console.error("Admin check error:", error);
@@ -1483,44 +1482,13 @@ app.delete("/admin/products/:id", authenticateJWT, async (req, res) => {
   }
 
   try {
-   const [updateResult] = await db.query(
-  `UPDATE products SET 
-    name = ?, 
-    technical_name = ?, 
-    main_image = ?, 
-    sub_image1 = ?, 
-    sub_image2 = ?, 
-    sub_image3 = ?, 
-    price_range = ?, 
-    about = ?, 
-    sku = ?, 
-    category = ?, 
-    description = ?, 
-    slug = ?, 
-    weight_price_map = ?
-  WHERE id = ?`,
-  [
-    name,
-    technical_name,
-    main_image,
-    sub_image1,
-    sub_image2,
-    sub_image3,
-    price_range,
-    about,
-    sku,
-    category,
-    description,
-    slug,
-    JSON.stringify(weight_price_map),
-    productId,
-  ]
-);
+    const result = await executeWithRetry("DELETE FROM products WHERE id = ?", [
+      productId,
+    ]);
 
-if (updateResult.affectedRows === 0) {
-  return res.status(404).json({ message: "Product not found" });
-}
-
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Product not found" });
+    }
 
     res.json({ success: true, message: "Product deleted successfully" });
   } catch (err) {
