@@ -1470,6 +1470,35 @@ app.put("/admin/products/:id", authenticateJWT, async (req, res) => {
   }
 });
 
+app.delete("/admin/products/:id", authenticateJWT, async (req, res) => {
+  const productId = req.params.id;
+
+  // Check if admin
+  const adminCheck = await executeWithRetry(
+    "SELECT is_admin FROM users WHERE id = ?",
+    [req.user.id]
+  );
+  if (!adminCheck[0]?.is_admin) {
+    return res.status(403).json({ message: "Access denied" });
+  }
+
+  try {
+    const result = await executeWithRetry("DELETE FROM products WHERE id = ?", [
+      productId,
+    ]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json({ success: true, message: "Product deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting product:", err);
+    res.status(500).json({ message: "Server error while deleting product" });
+  }
+});
+
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
