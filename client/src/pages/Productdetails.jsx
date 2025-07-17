@@ -5,7 +5,7 @@ import "./Products.css";
 import Footer from "./Footer";
 import { useCart } from "../context/CartContext";
 import { toast } from "react-toastify";
-
+import ReactMarkdown from "react-markdown";
 
 const Productdetails = () => {
   const [showDescription, setShowDescription] = useState(false);
@@ -19,31 +19,32 @@ const Productdetails = () => {
 
   const navigate = useNavigate();
 
-   useEffect(() => {
-  const url = `${import.meta.env.VITE_API_BASE_URL}/products/${slug}`;
-  console.log("👉 Fetching from:", url);
+  useEffect(() => {
+    const url = `${import.meta.env.VITE_API_BASE_URL}/products/${slug}`;
+    console.log("👉 Fetching from:", url);
 
-  axios
-    .get(url)
-    .then((res) => {
-      console.log("Fetched product ➤", res.data);
+    axios
+      .get(url)
+      .then((res) => {
+        console.log("Fetched product ➤", res.data);
 
-      const productData = res.data;
+        const productData = res.data;
 
-      if (typeof productData.weight_price_map === "string") {
-        try {
-          productData.weight_price_map = JSON.parse(productData.weight_price_map);
-        } catch (e) {
-          console.warn("Invalid weight_price_map JSON:", e);
-          productData.weight_price_map = {};
+        if (typeof productData.weight_price_map === "string") {
+          try {
+            productData.weight_price_map = JSON.parse(
+              productData.weight_price_map
+            );
+          } catch (e) {
+            console.warn("Invalid weight_price_map JSON:", e);
+            productData.weight_price_map = {};
+          }
         }
-      }
 
-      setProduct(productData);
-    })
-    .catch((err) => console.error("❌ Error loading product:", err));
-}, [slug]);
-
+        setProduct(productData);
+      })
+      .catch((err) => console.error("❌ Error loading product:", err));
+  }, [slug]);
 
   if (!product) return <div>Loading...</div>;
 
@@ -160,10 +161,9 @@ const Productdetails = () => {
               DESCRIPTION
             </button>
             {showDescription && (
-              <div
-                className="description-text"
-                dangerouslySetInnerHTML={{ __html: product.description }}
-              ></div>
+              <div className="description-text markdown-body">
+                <ReactMarkdown>{product.description}</ReactMarkdown>
+              </div>
             )}
           </div>
         </div>

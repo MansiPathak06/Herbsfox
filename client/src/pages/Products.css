@@ -71,6 +71,28 @@
   color: #333;
 }
 
+.markdown-body {
+  line-height: 1.7;
+  color: #444;
+  font-size: 1.05rem;
+  padding: 1rem 0;
+}
+
+.markdown-body h2,
+.markdown-body h3 {
+  margin-top: 1.2rem;
+  font-weight: 600;
+}
+
+.markdown-body ul {
+  margin-left: 1.5rem;
+  list-style: disc;
+}
+
+.markdown-body p {
+  margin-bottom: 0.8rem;
+}
+
 .add:disabled {
   background-color: #ccc;
   cursor: not-allowed;
