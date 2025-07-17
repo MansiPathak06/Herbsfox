@@ -95,6 +95,40 @@
   color: #1a770c;
 }
 
+
+@media screen and (max-width: 768px) {
+  .navbar .nav-links a,
+  .nav-links .dropdown-title {
+    font-size: 14px; /* bigger text */
+    padding: 12px 16px;
+    font-weight: 500;
+  }
+
+  .dropdown-title .arrow {
+    font-size: 14px;
+    margin-left: auto;
+  }
+}
+
+
+.dropdown-title {
+  font-size: 15px; /* match others */
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media screen and (min-width: 769px) {
+  .dropdown-title .arrow {
+    display: none;
+  }
+}
+
+
+
+
 /* ----------------- RESPONSIVE ----------------- */
 @media screen and (max-width: 768px) {
   .navbar {
@@ -290,3 +324,5 @@
 .account-dropdown:hover .dropdown-menu {
   display: block;
 }
+
+

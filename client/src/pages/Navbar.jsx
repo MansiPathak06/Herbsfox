@@ -20,6 +20,13 @@ const Navbar = () => {
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
   const [searchActive, setSearchActive] = useState(false); // Added searchActive state
   const searchContainerRef = useRef(null); // Reference to detect click outside
+ const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+useEffect(() => {
+  const handleResize = () => setIsMobile(window.innerWidth <= 768);
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
 
   // Search logic
   const handleSearch = (e) => {
@@ -43,13 +50,16 @@ const Navbar = () => {
   // Close search bar if clicked outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(event.target)
+      ) {
         setSearchActive(false); // Close search bar when clicked outside
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -69,65 +79,97 @@ const Navbar = () => {
 
       <ul className={`nav-links ${menuOpen ? "open" : ""}`}>
         <li>
-          <Link to="/" onClick={() => setMenuOpen(false)}>HOME</Link>
+          <Link to="/" onClick={() => setMenuOpen(false)}>
+            HOME
+          </Link>
         </li>
         <li>
-          <Link to="/about" onClick={() => setMenuOpen(false)}>ABOUT</Link>
+          <Link to="/about" onClick={() => setMenuOpen(false)}>
+            ABOUT
+          </Link>
         </li>
         <li
-          className="dropdown"
-          onMouseEnter={() => setShopDropdownOpen(true)}
-          onMouseLeave={() => setShopDropdownOpen(false)}
+          className={`dropdown ${shopDropdownOpen ? "open" : ""}`}
+          onMouseEnter={() => !isMobile && setShopDropdownOpen(true)}
+          onMouseLeave={() => !isMobile && setShopDropdownOpen(false)}
         >
-          <Link
-            to="/shop"
-            className="dropdown-title"
-            onClick={(e) => {
-              e.preventDefault();
-              setShopDropdownOpen(!shopDropdownOpen);
-             
-            }}
+          <div
+            className={`dropdown-title ${shopDropdownOpen ? "open" : ""}`}
+            onClick={() => isMobile && setShopDropdownOpen((prev) => !prev)}
           >
-            SHOP
-          </Link>
-          {(shopDropdownOpen ||(menuOpen && shopDropdownOpen)) && (
+            SHOP {isMobile && <span className="arrow">{shopDropdownOpen ? "▼" : "▶"}</span>}
+
+          </div>
+
+          {shopDropdownOpen && (
             <ul className="dropdown-menu">
-              <li><Link to="/herbs" onClick={() => setMenuOpen(false)}>HERBS</Link></li>
-              <li><Link to="/spices" onClick={() => setMenuOpen(false)}>SPICES</Link></li>
-              <li><Link to="/poojaitems" onClick={() => setMenuOpen(false)}>POOJA ITEMS</Link></li>
-              <li><Link to="/seeds" onClick={() => setMenuOpen(false)}>SEEDS</Link></li>
+              <li>
+                <Link to="/herbs" onClick={() => setMenuOpen(false)}>
+                  HERBS
+                </Link>
+              </li>
+              <li>
+                <Link to="/spices" onClick={() => setMenuOpen(false)}>
+                  SPICES
+                </Link>
+              </li>
+              <li>
+                <Link to="/poojaitems" onClick={() => setMenuOpen(false)}>
+                  POOJA ITEMS
+                </Link>
+              </li>
+              <li>
+                <Link to="/seeds" onClick={() => setMenuOpen(false)}>
+                  SEEDS
+                </Link>
+              </li>
             </ul>
           )}
         </li>
+
         <li>
-          <Link to="/contact" onClick={() => setMenuOpen(false)}>CONTACT US</Link>
+          <Link to="/contact" onClick={() => setMenuOpen(false)}>
+            CONTACT US
+          </Link>
         </li>
         <li
-          className="dropdown"
-          onMouseEnter={() => setAccountDropdownOpen(true)}
-          onMouseLeave={() => setAccountDropdownOpen(false)}
+          className={`dropdown ${accountDropdownOpen ? "open" : ""}`}
+          onMouseEnter={() => !isMobile && setAccountDropdownOpen(true)}
+          onMouseLeave={() => !isMobile && setAccountDropdownOpen(false)}
         >
-          <Link
-            to="#"
-            className="dropdown-title"
-            onClick={(e) => {
-              e.preventDefault();
-              setAccountDropdownOpen(!accountDropdownOpen);
-             
-            }}
+          <div
+            className={`dropdown-title ${accountDropdownOpen ? "open" : ""}`}
+            onClick={() => isMobile && setAccountDropdownOpen((prev) => !prev)}
           >
-            ACCOUNTS
-          </Link>
-          {(accountDropdownOpen || (menuOpen && accountDropdownOpen))&& (
+            ACCOUNT {isMobile && <span className="arrow">{accountDropdownOpen ? "▼" : "▶"}</span>}
+
+          </div>
+
+          {accountDropdownOpen && (
             <ul className="dropdown-menu">
-              <li><Link to="/my-account" onClick={() => setMenuOpen(false)}>MY ACCOUNT</Link></li>
-              <li><Link to="/cart" onClick={() => setMenuOpen(false)}>CART</Link></li>
-              <li><Link to="/checkout" onClick={() => setMenuOpen(false)}>CHECKOUT</Link></li>
+              <li>
+                <Link to="/my-account" onClick={() => setMenuOpen(false)}>
+                  MY ACCOUNT
+                </Link>
+              </li>
+              <li>
+                <Link to="/cart" onClick={() => setMenuOpen(false)}>
+                  CART
+                </Link>
+              </li>
+              <li>
+                <Link to="/checkout" onClick={() => setMenuOpen(false)}>
+                  CHECKOUT
+                </Link>
+              </li>
             </ul>
           )}
         </li>
+
         <li>
-          <Link to="/blogs" onClick={() => setMenuOpen(false)}>BLOGS</Link>
+          <Link to="/blogs" onClick={() => setMenuOpen(false)}>
+            BLOGS
+          </Link>
         </li>
       </ul>
 
@@ -154,7 +196,6 @@ const Navbar = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            
           </form>
         </div>
       )}
