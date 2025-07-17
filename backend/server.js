@@ -1289,14 +1289,19 @@ app.get("/products/:slug", async (req, res) => {
       ? JSON.parse(product.weight_price_map)
       : {};
 
-    const subImages = Array.isArray(product.sub_images)
-      ? product.sub_images
-      : [];
+    // const subImages = Array.isArray(product.sub_images)
+    //   ? product.sub_images
+    //   : [];
+    // product.sub_images = [
+    //   subImages[0] || null,
+    //   subImages[1] || null,
+    //   subImages[2] || null,
+    // ].filter(Boolean); // avoid nulls
     product.sub_images = [
-      subImages[0] || null,
-      subImages[1] || null,
-      subImages[2] || null,
-    ].filter(Boolean); // avoid nulls
+      product.sub_image1,
+      product.sub_image2,
+      product.sub_image3,
+    ].filter(Boolean);
 
     delete product.sub_image1;
     delete product.sub_image2;
@@ -1496,7 +1501,6 @@ app.delete("/admin/products/:id", authenticateJWT, async (req, res) => {
     res.status(500).json({ message: "Server error while deleting product" });
   }
 });
-
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
