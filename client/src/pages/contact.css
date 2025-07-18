@@ -1,83 +1,69 @@
-.contact-wrapper {
-  display: flex;
-  flex-direction: row; /* default but explicit */
-  justify-content: space-between; /* space out form and info */
-  gap: 10rem; /* optional spacing between form and info */
-  flex-wrap: wrap; /* allow wrapping on smaller screens */
-}
-
-.contact-form,
-.contact-info {
-  flex: 1; /* take equal width or adjust accordingly */
-  min-width: 300px; /* helps with responsiveness */
-}
-
-/* .contact-heading {
-  margin-top: 35px;
-  text-align: center;
-  background: url("heading-bg.jpg");
-  color: white;
-  text-decoration: none;
-  padding-top: 50px;
-  height: 140px;
+.contact-heading {
+  background: url("/images/heading-bg.jpg");
+  background-size: cover;
+  background-position: center;
+  padding: 50px 20px; /* Top and side padding */
+  min-height: 180px; /* Allow room for large text */
   width: 100%;
+  text-align: center;
+  margin-bottom: 2rem;
   font-weight: 300;
   font-size: 65px;
-} */
-
-.contact-heading {
-  margin-top: 35px;
-  text-align: center;
-  background: url("/images/heading-bg.jpg") center/cover no-repeat;
   color: white;
-  text-decoration: none;
-  padding-top: 50px;
-  height: 140px;
-  width: 100%;
-  font-weight: 300;
-  font-size: 8vw; /* Scales with screen width */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* For larger screens */
-@media (min-width: 768px) {
-  .contact-heading {
-    width: 100%;
-    font-size: 50px;
-  }
+/* Wrapper for form and contact info */
+.contact-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 3rem;
+  padding: 2rem;
 }
 
-/* For very large screens */
-@media (min-width: 1200px) {
-  .contact-heading {
-    font-size: 65px;
-  }
-}
-
-
-
-.contact-container {
-  font-size: 15px;
-  margin: 120px auto 50px;
-  width: 850px;
+/* Individual sections */
+.contact-form,
+.contact-info-wrapper {
+  flex: 1;
+  min-width: 300px;
   max-width: 100%;
 }
-.getintouch {
-  color: #8b4513;
-  font-family: "Times New Roman", Times, serif;
-  font-weight: 200;
-  font-size: 40px;
+
+/* Container for full contact section */
+.contact-container {
+  font-size: 15px;
+  margin: 80px auto 50px;
+  max-width: 1200px;
+  padding: 0 1rem;
 }
+
+.getintouch {
+  color: #601f1f;
+  font-family: "Times New Roman", Times, serif;
+  font-weight: 400;
+  font-size: 36px;
+  margin-bottom: 1rem;
+}
+
 .label {
   color: #141313;
   font-size: 16px;
+  display: block;
+  margin-bottom: 0.5rem;
 }
+
 input,
 textarea {
   width: 100%;
-  border-radius: none;
   margin-bottom: 15px;
   padding: 10px;
-  font-size: 11px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .sendmsg-button,
@@ -89,9 +75,11 @@ textarea {
   font-size: 16px;
   color: rgb(5, 51, 5);
   background-color: rgb(153, 203, 153);
-  box-shadow: 10px 10px 5px rgb(188, 241, 204);
+  box-shadow: 5px 5px 10px rgba(188, 241, 204, 0.6);
   border: none;
+  border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 .sendmsg-button:hover,
@@ -101,27 +89,48 @@ textarea {
   color: white;
 }
 
-.getintouch {
-  color: #601f1f;
-}
-
 .address {
   color: rgb(57, 55, 55);
+  font-size: 16px;
 }
 
-.contact-info-wrapper {
-  flex: 1;
-  min-width: 300px;
+.contact-info {
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
   gap: 1rem;
+  flex: 1;
+  min-width: 300px;
 }
 
 .contact-map iframe {
   width: 100%;
-  height: 250px; /* horizontal rectangle shape */
+  height: 250px;
   border: none;
   border-radius: 8px;
   box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.1);
 }
-/* 7302277601 */
+
+/* ---------------- MEDIA QUERIES ---------------- */
+
+/* Medium screens: make it single column on small tablets */
+@media (max-width: 768px) {
+  .contact-wrapper {
+    flex-direction: column;
+    gap: 2rem;
+    padding: 1rem;
+  }
+
+  .contact-container {
+    margin: 60px auto 40px;
+  }
+
+  .getintouch {
+    font-size: 30px;
+    text-align: center;
+  }
+
+  .contact-heading {
+    font-size: clamp(24px, 10vw, 50px);
+  }
+}

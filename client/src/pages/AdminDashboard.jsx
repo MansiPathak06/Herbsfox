@@ -309,7 +309,7 @@ const AdminDashboard = ({
 
   return (
     <div className="admin-dashboard">
-      <h2>Welcome Admin, {userInfo?.name}</h2>
+      <h2>Welcome Admin, {userInfo?.name}.....</h2>
 
       <div className="admin-nav">
         <button onClick={() => setActiveSection("MANAGE_USERS")}>

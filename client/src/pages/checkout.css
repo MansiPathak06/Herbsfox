@@ -1,19 +1,18 @@
 .checkout-heading {
-  background: url("/images/heading-bg.jpg");
-  color: white;
-  margin-top: 35px;
+   background: url("/images/heading-bg.jpg");
+  background-size: cover;
+  background-position: center;
+  padding: 50px 20px; /* Top and side padding */
+  min-height: 180px; /* Allow room for large text */
+  width: 100%;
   text-align: center;
-  width: 100%;
-  font-size: 28px;
-  height: auto;
-  padding: 30px 0;
-  font-weight: 300;
-  padding-top: 50px;
-  text-decoration: none;
-  height: 120px;
-  width: 100%;
+  margin-bottom: 2rem;
   font-weight: 300;
   font-size: 65px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .checkout-container {
   display: flex;

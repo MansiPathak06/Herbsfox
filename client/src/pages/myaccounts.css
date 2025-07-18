@@ -3,16 +3,21 @@ font-family:  'Open Sans', sans-serif;
 }
 .myaccount-heading {
   background: url("/images/heading-bg.jpg");
-  padding-top: 50px;
-  height: 140px;
+  background-size: cover;
+  background-position: center;
+  padding: 50px 20px; /* Top and side padding */
+  min-height: 180px; /* Allow room for large text */
   width: 100%;
   text-align: center;
   margin-bottom: 2rem;
-  text-decoration: none;
   font-weight: 300;
   font-size: 65px;
   color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 
 /* Form sections */
 .leftsection2,
