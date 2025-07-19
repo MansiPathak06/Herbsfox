@@ -1252,23 +1252,23 @@ app.put(
 // 🔒 Get all products (optionally filtered by category)
 // Get all products
 app.get("/products", async (req, res) => {
+  const { category, sort } = req.query;
   try {
-    let query = "SELECT * FROM products";
-    const { category } = req.query;
-
-    if (category) {
-      query += " WHERE category = ?";
-      const products = await executeWithRetry(query, [category]);
-      return res.json(products);
+    let query = "SELECT * FROM products WHERE category = ?";
+    if (sort === "lowToHigh") {
+      query += " ORDER BY CAST(JSON_UNQUOTE(JSON_EXTRACT(weight_price_map, '$.\"100g\"')) AS UNSIGNED) ASC";
+    } else if (sort === "highToLow") {
+      query += " ORDER BY CAST(JSON_UNQUOTE(JSON_EXTRACT(weight_price_map, '$.\"100g\"')) AS UNSIGNED) DESC";
     }
 
-    const products = await executeWithRetry(query);
-    res.json(products);
+    const [rows] = await db.query(query, [category]);
+    res.json(rows);
   } catch (err) {
     console.error("Error fetching products:", err);
-    res.status(500).json({ message: "Server error while fetching products" });
+    res.status(500).json({ message: "Error fetching products" });
   }
 });
+
 
 app.get("/products/:slug", async (req, res) => {
   try {

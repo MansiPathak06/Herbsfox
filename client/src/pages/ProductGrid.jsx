@@ -17,6 +17,7 @@ const ProductGrid = ({ category }) => {
       .then((res) => res.json())
       .then((data) => {
         const productList = Array.isArray(data) ? data : data.products || [];
+          console.log("Sample product:", productList[0]); // 👈 ADD THIS
         setProducts(productList);
         setPage(1); // Reset page on category change
       })
@@ -24,23 +25,35 @@ const ProductGrid = ({ category }) => {
   };
 
  const getFirstPrice = (product) => {
-  if (product.weight_price_map) {
-    const prices = Object.values(product.weight_price_map);
-    if (prices.length > 0) return parseFloat(prices[0]);
+  try {
+    if (product.weight_price_map) {
+      const parsedMap = JSON.parse(product.weight_price_map); // ✅ Convert string to object
+      const prices = Object.values(parsedMap)
+        .map(p => parseFloat(p))
+        .filter(p => !isNaN(p));
+      return prices.length > 0 ? prices[0] : 0;
+    }
+  } catch (err) {
+    console.error("❌ Error parsing weight_price_map:", err);
   }
   return 0;
 };
 
-const sortedProducts = [...products].sort((a, b) => {
-  if (sortOption === "lowToHigh") return getFirstPrice(a) - getFirstPrice(b);
-  if (sortOption === "highToLow") return getFirstPrice(b) - getFirstPrice(a);
-  return 0; // Default
-});
+
+  const sortedProducts = [...products].sort((a, b) => {
+    if (sortOption === "lowToHigh") return getFirstPrice(a) - getFirstPrice(b);
+    if (sortOption === "highToLow") return getFirstPrice(b) - getFirstPrice(a);
+    return 0; // Default
+  });
+  console.log("Sorted Prices:", sortedProducts.map(p => getFirstPrice(p)));
 
 
   const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
-  const currentProducts = sortedProducts.slice(startIndex, startIndex + itemsPerPage);
+  const currentProducts = sortedProducts.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   return (
     <div className="gallery">
@@ -51,7 +64,11 @@ const sortedProducts = [...products].sort((a, b) => {
           <select
             id="sort"
             value={sortOption}
-            onChange={(e) => setSortOption(e.target.value)}
+            // onChange={(e) => setSortOption(e.target.value)}
+            onChange={(e) => {
+              console.log("Selected sorting option:", e.target.value); // 👈 Add this line
+              setSortOption(e.target.value);
+            }}
             className="sort-dropdown"
           >
             <option value="default">Default Sorting</option>
