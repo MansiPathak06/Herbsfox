@@ -138,7 +138,7 @@ font-family:  'Open Sans', sans-serif;
   background-size: cover;
   background-position: center;
   padding: 50px 20px; /* Top and side padding */
-  min-height: 180px; /* Allow room for large text */
+  min-height: 190px; /* Allow room for large text */
   width: 100%;
   text-align: center;
   margin-bottom: 2rem;
