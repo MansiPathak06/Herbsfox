@@ -23,21 +23,20 @@ const ProductGrid = ({ category }) => {
       .catch((err) => console.error(`❌ Failed to fetch ${category}:`, err));
   };
 
-  // Sorting based on weight_price_map (min or max price)
-  const sortedProducts = [...products];
-  if (sortOption === "lowToHigh") {
-    sortedProducts.sort((a, b) => {
-      const aMin = Math.min(...Object.values(a.weight_price_map || {}));
-      const bMin = Math.min(...Object.values(b.weight_price_map || {}));
-      return aMin - bMin;
-    });
-  } else if (sortOption === "highToLow") {
-    sortedProducts.sort((a, b) => {
-      const aMax = Math.max(...Object.values(a.weight_price_map || {}));
-      const bMax = Math.max(...Object.values(b.weight_price_map || {}));
-      return bMax - aMax;
-    });
+ const getFirstPrice = (product) => {
+  if (product.weight_price_map) {
+    const prices = Object.values(product.weight_price_map);
+    if (prices.length > 0) return parseFloat(prices[0]);
   }
+  return 0;
+};
+
+const sortedProducts = [...products].sort((a, b) => {
+  if (sortOption === "lowToHigh") return getFirstPrice(a) - getFirstPrice(b);
+  if (sortOption === "highToLow") return getFirstPrice(b) - getFirstPrice(a);
+  return 0; // Default
+});
+
 
   const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
