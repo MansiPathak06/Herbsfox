@@ -10,25 +10,25 @@ const ProductGrid = ({ category }) => {
 
   useEffect(() => {
     fetchProducts();
-  }, [category,sortOption]);
+  }, [category, sortOption]);
 
   const fetchProducts = () => {
-    fetch(`https://herbsfox.onrender.com/products?category=${category}`)
+    fetch(
+      `https://herbsfox.onrender.com/products?category=${category}&sort=${sortOption}`
+    )
       .then((res) => res.json())
       .then((data) => {
         const productList = Array.isArray(data) ? data : data.products || [];
-          console.log("Sample product:", productList[0]); // 👈 ADD THIS
+        console.log("Sample product:", productList[0]); // 👈 ADD THIS
         setProducts(productList);
         setPage(1); // Reset page on category change
       })
       .catch((err) => console.error(`❌ Failed to fetch ${category}:`, err));
   };
 
- 
   const totalPages = Math.ceil(products.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
- const currentProducts = products.slice(startIndex, startIndex + itemsPerPage);
-
+  const currentProducts = products.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="gallery">
