@@ -1,33 +1,14 @@
-
-
-
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import ProductCard from './Productcard';
+import React from "react";
+import ProductGrid from "./ProductGrid";
 import Footer from "./Footer";
-import "./shop.css";
 
-const Poojaitems = () => {
-  const [products, setProducts] = useState([]);
-
-  useEffect(() => {
-    axios.get(`https://herbsfox.onrender.com/products?category=Poojaitems`)
-// 🔁 Filter by category
-      .then((res) => setProducts(res.data))
-      .catch((err) => console.error(err));
-  }, []);
-
+const PoojaItems = () => {
   return (
-    <div className="gallery">
-      <h1 className="shop-heading">Pooja Items</h1>
-      <div className="image-row">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+    <>
+      <ProductGrid category="Pooja Items" />
       <Footer />
-    </div>
+    </>
   );
 };
 
-export default Poojaitems;
+export default PoojaItems;

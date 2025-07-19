@@ -80,6 +80,7 @@ import Seeds from "./pages/Seeds";
 // import Chiaseeds from "./products/Chiaseeds";
 // import Tilsafed from "./products/Tilsafed";
 import SearchResults from "./pages/SearchResults";
+import ProductGrid from "./pages/ProductGrid.jsx";
 
 
 import AdminDashboard from "./pages/AdminDashboard.jsx";
@@ -120,6 +121,7 @@ function App() {
         <Route path="/spices" element={<Spices />} />
         <Route path="/poojaitems" element={<Poojaitems />} />
         <Route path="/seeds" element={<Seeds />} />
+        <Route path="/productgrid" element={<ProductGrid/>}/>
         <Route path="/Footer" element={<Footer />} />
 
         <Route path="/Paymentpolicy" element={<Paymentpolicy />} />

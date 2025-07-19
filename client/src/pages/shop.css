@@ -73,12 +73,12 @@ font-family:  'Open Sans', sans-serif;
   padding: 8px 12px;
   background-color: transparent;
   border: 1px solid rgb(198, 197, 197);
-  border-radius: 5px;
+  border-radius: 2px;
   cursor: pointer;
 }
 
 .pagination .active {
-  background-color: #a8a9aa;
+  background-color: #799e8b;
   color: rgb(5, 0, 0);
 }
 .image-container {
@@ -163,18 +163,28 @@ font-family:  'Open Sans', sans-serif;
     }
 }  
 
-.sort-wrapper {
+.sort-container {
+  
   display: flex;
-  justify-content: flex-start;   /* left aligned, जैसा WooCommerce में होता है */
-  margin: 0 0 20px 0;
+  justify-content: flex-end;
+  margin: 20px 0;
 }
 
-.sort-wrapper select {
-  background: transparent;
-  padding: 12px 15px;
-  font-size: 15px;
-  margin-left: 10px;
-  border: 1px solid #ccc;
+.sort-dropdown {
+  padding: 14px 18px;
+   background-color: transparent;
   color: #555;
-  border-radius: 4px;
+  font-size: 16px;
+}
+.grid-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 10px;
+  flex-wrap: wrap;
+}
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
 }
