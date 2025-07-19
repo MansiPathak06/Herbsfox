@@ -1254,17 +1254,36 @@ app.put(
 app.get("/products", async (req, res) => {
   const { category, sort } = req.query;
   try {
-    let query = "SELECT * FROM products WHERE category = ?";
-    if (sort === "lowToHigh") {
-      query += " ORDER BY CAST(JSON_UNQUOTE(JSON_EXTRACT(weight_price_map, '$.\"100g\"')) AS UNSIGNED) ASC";
-    } else if (sort === "highToLow") {
-      query += " ORDER BY CAST(JSON_UNQUOTE(JSON_EXTRACT(weight_price_map, '$.\"100g\"')) AS UNSIGNED) DESC";
+    const [rows] = await db.query("SELECT * FROM products WHERE category = ?", [category]);
+
+    // If sorting is needed
+    if (sort === "lowToHigh" || sort === "highToLow") {
+      rows.sort((a, b) => {
+        const getFirstPrice = (product) => {
+          try {
+            let str = product.weight_price_map;
+            if (typeof str === "string") {
+              str = str.replace(/^"(.*)"$/, "$1"); // Remove outer quotes
+            }
+            const map = JSON.parse(str);
+            const prices = Object.values(map).map(p => parseFloat(p)).filter(p => !isNaN(p));
+            return prices.length > 0 ? prices[0] : Infinity;
+          } catch (e) {
+            console.error("Parsing error:", product.weight_price_map);
+            return Infinity;
+          }
+        };
+
+        const priceA = getFirstPrice(a);
+        const priceB = getFirstPrice(b);
+
+        return sort === "lowToHigh" ? priceA - priceB : priceB - priceA;
+      });
     }
 
-    const [rows] = await db.query(query, [category]);
     res.json(rows);
   } catch (err) {
-    console.error("Error fetching products:", err);
+    console.error("❌ Error fetching products:", err);
     res.status(500).json({ message: "Error fetching products" });
   }
 });
