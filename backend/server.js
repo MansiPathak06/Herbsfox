@@ -1254,7 +1254,9 @@ app.put(
 app.get("/products", async (req, res) => {
   const { category, sort } = req.query;
   try {
-    const [rows] = await db.query("SELECT * FROM products WHERE category = ?", [category]);
+    const [rows] = await db.query("SELECT * FROM products WHERE category = ?", [
+      category,
+    ]);
 
     // If sorting is needed
     if (sort === "lowToHigh" || sort === "highToLow") {
@@ -1262,14 +1264,30 @@ app.get("/products", async (req, res) => {
         const getFirstPrice = (product) => {
           try {
             let str = product.weight_price_map;
-            if (typeof str === "string") {
-              str = str.replace(/^"(.*)"$/, "$1"); // Remove outer quotes
+
+            // Remove outer quotes if any
+            if (
+              typeof str === "string" &&
+              str.startsWith('"') &&
+              str.endsWith('"')
+            ) {
+              str = str.slice(1, -1);
             }
+
+            // Unescape inner quotes
+            str = str.replace(/\\"/g, '"');
+
             const map = JSON.parse(str);
-            const prices = Object.values(map).map(p => parseFloat(p)).filter(p => !isNaN(p));
+            const prices = Object.values(map)
+              .map((p) => parseFloat(p))
+              .filter((p) => !isNaN(p));
+
             return prices.length > 0 ? prices[0] : Infinity;
           } catch (e) {
-            console.error("Parsing error:", product.weight_price_map);
+            console.error(
+              "❌ Parsing error in getFirstPrice:",
+              product.weight_price_map
+            );
             return Infinity;
           }
         };
@@ -1287,7 +1305,6 @@ app.get("/products", async (req, res) => {
     res.status(500).json({ message: "Error fetching products" });
   }
 });
-
 
 app.get("/products/:slug", async (req, res) => {
   try {
