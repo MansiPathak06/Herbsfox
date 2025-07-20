@@ -60,6 +60,38 @@ font-family:  'Open Sans', sans-serif;
 @media (max-width: 600px) {
   .image-row {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .image-container {
+    margin-right: 0;
+    width: 100%;
+    width: 90% !important;
+    margin: 0 auto !important;     /* Center the card */
+    padding: 10px;
+   
+  }
+
+  .image-container img {
+    height: auto;
+    aspect-ratio: 4/3;
+      width: 100%;
+    object-fit: contain;
+  }
+
+  .caption {
+    font-size: 14px;
+  }
+
+  .caption2 {
+    font-size: 12px;
+  }
+
+  .select-button {
+    font-size: 12px;
+    line-height: 40px;
+    height: 40px;
+    padding: 0 12px;
   }
 }
 
@@ -81,6 +113,7 @@ font-family:  'Open Sans', sans-serif;
   background-color: #799e8b;
   color: rgb(5, 0, 0);
 }
+
 .image-container {
   position: relative;
   cursor: pointer;
@@ -130,9 +163,9 @@ font-family:  'Open Sans', sans-serif;
   font-weight: 400;
   letter-spacing: 2px;
   background-color: #799e8b;
-
   border-width: 1px;
 }
+
 .shop-heading {
    background: url("/images/heading-bg.jpg");
   background-size: cover;
@@ -149,22 +182,27 @@ font-family:  'Open Sans', sans-serif;
   align-items: center;
   justify-content: center;
 }
+
 @media (max-width: 768px) {
-    .image-container {
-      width: 88%;
-      grid-template-columns: 1fr;
-      padding: 20px;
-    }
-  
-    .contact-container {
-      margin-left: auto;
-      margin-right: auto;
-      padding: 10px;
-    }
+  .image-container {
+    width: 88%;
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+
+  .contact-container {
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px;
+  }
+
+  .shop-heading {
+    font-size: 40px;
+    padding: 30px 10px;
+  }
 }  
 
 .sort-container {
-  
   display: flex;
   justify-content: flex-end;
   margin: 20px 0;
@@ -172,10 +210,11 @@ font-family:  'Open Sans', sans-serif;
 
 .sort-dropdown {
   padding: 14px 18px;
-   background-color: transparent;
+  background-color: transparent;
   color: #555;
   font-size: 16px;
 }
+
 .grid-header {
   display: flex;
   justify-content: space-between;
@@ -183,6 +222,7 @@ font-family:  'Open Sans', sans-serif;
   margin: 20px 10px;
   flex-wrap: wrap;
 }
+
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
