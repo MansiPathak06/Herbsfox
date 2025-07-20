@@ -1300,6 +1300,12 @@ app.get("/products", async (req, res) => {
       });
     }
 
+    res.json(rows);
+  } catch (err) {
+    console.error("❌ Error fetching products:", err);
+    res.status(500).json({ message: "Error fetching products" });
+  }
+});
 
 
 app.get("/products/:slug", async (req, res) => {
