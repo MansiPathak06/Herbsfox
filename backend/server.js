@@ -1253,12 +1253,20 @@ app.put(
 // Get all products
 app.get("/products", async (req, res) => {
   const { category, sort } = req.query;
-  try {
-    const [rows] = await db.query("SELECT * FROM products WHERE category = ?", [
-      category,
-    ]);
 
-    // If sorting is needed
+  try {
+    let query = "SELECT * FROM products";
+    const values = [];
+
+    // 👇 Add WHERE condition only if category is present
+    if (category && category.trim() !== "") {
+      query += " WHERE category = ?";
+      values.push(category);
+    }
+
+    const [rows] = await db.query(query, values);
+
+    // 🔽 Sorting logic
     if (sort === "lowToHigh" || sort === "highToLow") {
       rows.sort((a, b) => {
         const getFirstPrice = (product) => {
@@ -1266,11 +1274,7 @@ app.get("/products", async (req, res) => {
             let str = product.weight_price_map;
 
             // Remove outer quotes if any
-            if (
-              typeof str === "string" &&
-              str.startsWith('"') &&
-              str.endsWith('"')
-            ) {
+            if (typeof str === "string" && str.startsWith('"') && str.endsWith('"')) {
               str = str.slice(1, -1);
             }
 
@@ -1284,10 +1288,7 @@ app.get("/products", async (req, res) => {
 
             return prices.length > 0 ? prices[0] : Infinity;
           } catch (e) {
-            console.error(
-              "❌ Parsing error in getFirstPrice:",
-              product.weight_price_map
-            );
+            console.error("❌ Parsing error:", product.weight_price_map);
             return Infinity;
           }
         };
@@ -1299,12 +1300,7 @@ app.get("/products", async (req, res) => {
       });
     }
 
-    res.json(rows);
-  } catch (err) {
-    console.error("❌ Error fetching products:", err);
-    res.status(500).json({ message: "Error fetching products" });
-  }
-});
+
 
 app.get("/products/:slug", async (req, res) => {
   try {

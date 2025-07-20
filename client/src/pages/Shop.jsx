@@ -2,29 +2,33 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Footer from "./Footer";
-
 import "./shop.css";
 
 const Shop = () => {
   const [products, setProducts] = useState([]);
+  const [sortOption, setSortOption] = useState("default");
   const [page, setPage] = useState(1);
   const imagesPerPage = 12;
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios
-      .get(`${import.meta.env.VITE_API_BASE_URL}/products`)
+    fetchProducts();
+  }, [sortOption]);
 
+  const fetchProducts = () => {
+    const sortParam = sortOption !== "default" ? `?sort=${sortOption}` : "";
+    axios
+      .get(`${import.meta.env.VITE_API_BASE_URL}/products${sortParam}`)
       .then((res) => {
-        // 🔍 Check if data is inside `products` or directly an array
-        console.log("✅ PRODUCT DATA:", res.data); // 👈 ADD THIS
+        console.log("✅ PRODUCT DATA:", res.data);
         const fetchedProducts = Array.isArray(res.data)
           ? res.data
           : res.data.products || [];
         setProducts(fetchedProducts);
+        setPage(1); // Reset to first page on sorting
       })
       .catch((err) => console.error("Error fetching products:", err));
-  }, []);
+  };
 
   const totalPages = Math.ceil(products.length / imagesPerPage);
   const start = (page - 1) * imagesPerPage;
@@ -36,7 +40,21 @@ const Shop = () => {
 
   return (
     <div className="gallery">
-      <h1 className="shop-heading">Shop</h1>
+      <div className="grid-header">
+        <h1 className="shop-heading">Shop</h1>
+        <div className="sort-container">
+          <select
+            id="sort"
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+            className="sort-dropdown"
+          >
+            <option value="default">Default Sorting</option>
+            <option value="lowToHigh">Price: Low to High</option>
+            <option value="highToLow">Price: High to Low</option>
+          </select>
+        </div>
+      </div>
 
       <div className="image-row">
         {Array.isArray(visibleImages) && visibleImages.length > 0 ? (
@@ -64,6 +82,7 @@ const Shop = () => {
           </p>
         )}
       </div>
+
       <div className="pagination">
         {Array.from({ length: totalPages }, (_, i) => (
           <button

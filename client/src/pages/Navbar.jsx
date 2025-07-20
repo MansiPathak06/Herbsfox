@@ -20,13 +20,13 @@ const Navbar = () => {
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
   const [searchActive, setSearchActive] = useState(false); // Added searchActive state
   const searchContainerRef = useRef(null); // Reference to detect click outside
- const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-useEffect(() => {
-  const handleResize = () => setIsMobile(window.innerWidth <= 768);
-  window.addEventListener("resize", handleResize);
-  return () => window.removeEventListener("resize", handleResize);
-}, []);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Search logic
   const handleSearch = (e) => {
@@ -93,13 +93,23 @@ useEffect(() => {
           onMouseEnter={() => !isMobile && setShopDropdownOpen(true)}
           onMouseLeave={() => !isMobile && setShopDropdownOpen(false)}
         >
-          <div
+          <Link
+            to="/shop"
             className={`dropdown-title ${shopDropdownOpen ? "open" : ""}`}
-            onClick={() => isMobile && setShopDropdownOpen((prev) => !prev)}
+            onClick={(e) => {
+              if (isMobile) {
+                e.preventDefault(); // prevent navigation
+                setShopDropdownOpen((prev) => !prev);
+              } else {
+                setMenuOpen(false); // close menu on desktop
+              }
+            }}
           >
-            SHOP {isMobile && <span className="arrow">{shopDropdownOpen ? "▼" : "▶"}</span>}
-
-          </div>
+            SHOP{" "}
+            {isMobile && (
+              <span className="arrow">{shopDropdownOpen ? "▼" : "▶"}</span>
+            )}
+          </Link>
 
           {shopDropdownOpen && (
             <ul className="dropdown-menu">
@@ -141,8 +151,10 @@ useEffect(() => {
             className={`dropdown-title ${accountDropdownOpen ? "open" : ""}`}
             onClick={() => isMobile && setAccountDropdownOpen((prev) => !prev)}
           >
-            ACCOUNT {isMobile && <span className="arrow">{accountDropdownOpen ? "▼" : "▶"}</span>}
-
+            ACCOUNT{" "}
+            {isMobile && (
+              <span className="arrow">{accountDropdownOpen ? "▼" : "▶"}</span>
+            )}
           </div>
 
           {accountDropdownOpen && (
